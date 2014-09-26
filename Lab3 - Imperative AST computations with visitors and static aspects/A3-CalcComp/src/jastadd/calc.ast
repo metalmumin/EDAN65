@@ -1,0 +1,43 @@
+Program ::= Func*;
+
+abstract Func;
+
+FuncDecl : Func ::= Name:IdDecl Param:IdDecl* Block;
+Block ::= Stmt*;
+
+abstract Stmt;
+WhileStmt : Stmt ::= Expr Block;
+IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
+ReturnStmt: Stmt ::= Expr;
+AssignStmt: Stmt ::= IdUseExpr Expr;
+DeclStmt  : Stmt ::= IdDecl;
+PrintStmt : Stmt ::= Expr;
+DeclAssignStmt : Stmt ::= IdDecl Expr;
+
+abstract Expr;
+abstract BinExpr	: Expr ::= Left:Expr Right:Expr;
+abstract UnaryExpr	: Expr;
+abstract PrimaryExpr: UnaryExpr; 
+abstract Literal	: PrimaryExpr;
+abstract AddExpr	: BinExpr;
+abstract MulExpr	: BinExpr;
+
+IntLiteral : Literal ::= <NUMERAL>;
+
+IdUseExpr 	: PrimaryExpr ::= <ID>;
+FuncUseExpr : PrimaryExpr ::= IdUseExpr Expr*;
+ReadFunc    : PrimaryExpr ::= [Default:Expr];
+
+Add : AddExpr;
+Sub : AddExpr;
+Mul : MulExpr;
+Div : MulExpr;
+Mod : MulExpr;
+GT  : BinExpr;
+LT  : BinExpr;
+GE  : BinExpr;
+LE  : BinExpr;
+EQ  : BinExpr;
+NE  : BinExpr;
+
+IdDecl	::= <ID>;

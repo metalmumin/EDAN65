@@ -1,0 +1,218 @@
+import java.util.Set;
+import java.util.HashSet;
+
+aspect NameAnalysis {
+	public class SymbolTable {
+		private static final SymbolTable BOTTOM = new SymbolTable() {
+			@Override
+			public boolean declare(String name) {
+				throw new UnsupportedOperationException(
+						"can not add name to bottom of name stack");
+			}
+			@Override
+			public boolean lookup(String name) {
+				return false;
+			}
+		};
+
+		private final SymbolTable tail;
+		private int depth = 0;
+		private final Set<String> names = new HashSet<String>();
+
+		public SymbolTable() {
+			tail = BOTTOM;
+		}
+
+		public SymbolTable(SymbolTable tail) {
+			this.tail = tail;
+		}
+
+		/**
+		 * Attempt to add a new name to the symbol table.
+		 * @return true if name was not already declared
+		 */
+		public boolean declare(String name) {
+			return names.add(name);
+		}
+
+		/**
+		 * @return true if name has been declared
+		 */
+		public boolean lookup(String name) {
+			return names.contains(name) || tail.lookup(name);
+		}
+
+		/**
+		 * Push a new table on the stack.
+		 * @return the new top of the stack
+		 */
+		public SymbolTable push() {
+			increaseDepth();
+			return new SymbolTable(this);
+		}
+		
+		public void setDepth(int depth) {
+			this.depth = depth;
+		}
+		
+		public int getDepth() {
+			return this.depth;
+		}
+		
+		private void increaseDepth() {
+			this.depth += 1;
+		}
+	}
+
+	/**
+	 * @param err where to write error messages
+	 */
+	public void Program.checkNames(PrintStream err) {
+		SymbolTable symbols = new SymbolTable();
+		if(hasFunc()) {
+			for(int i = 0; i < getNumFunc(); ++i) {
+				getFunc(i).checkNames(err, symbols);
+			}
+		}
+	}
+
+	/**
+	 * @param err where to write error messages
+	 * @param symbols symbol table
+	 */
+	public void ASTNode.checkNames(PrintStream err, SymbolTable symbols) {
+		for (int i = 0; i < getNumChild(); ++i) {
+			getChild(i).checkNames(err, symbols);
+		}
+	}
+/*
+ *
+
+FuncUseExpr : PrimaryExpr ::= IdUseExpr Expr*;
+
+Add : AddExpr;
+Sub : AddExpr;
+Mul : MulExpr;
+Div : MulExpr;
+Mod : MulExpr;
+GT  : BinExpr;
+LT  : BinExpr;
+GE  : BinExpr;
+LE  : BinExpr;
+EQ  : BinExpr;
+NE  : BinExpr;
+
+IdDecl	::= <ID>;
+
+ */
+	/**
+	 *  MALL FÖR HUR DEPTH PROPAGERAS 
+	 **/
+	public void FuncDecl.checkNames(PrintStream err, SymbolTable symbols) {
+		getName().checkNames(err, symbols);
+		if(hasParam()) {
+			symbols = symbols.push();
+			for(int i = 0; i < getNumParam(); ++i) {
+				getParam(i).checkNames(err, symbols);
+			}
+			getBlock().checkNames(err, symbols);
+		}
+	}
+	
+	public void Block.checkNames(PrintStream out, SymbolTable symbols) {
+		if(hasStmt()) {
+			for(int i = 0; i < getNumStmt(); ++i) {
+				getStmt(i).checkNames(out, symbols);
+			}
+		}
+	}
+	
+	public void IfStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+		
+		// THEN and ELSE blocks have the same depth, but different symsbol tables 
+		getThen().checkNames(err, symbols.push()); // analyse Then:Block 
+		if(hasElse())  {					// analyse Else:Block, but only if Else:Block exists
+			getElse().checkNames(err, symbols.push());
+		}
+	}
+	
+	/**
+	 * WhileStmt : Stmt ::= Expr Block;
+	 */
+	public void WhileStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+		getBlock().checkNames(err, symbols.push()); // analyse Then:Block 
+	}
+	/**
+	 * PrintStmt : Stmt ::= Expr;
+	 */
+	public void PrintStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+	}
+	
+	public void ReturnStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+	}
+	
+	public void AssignStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getIdUseExpr().checkNames(err, symbols);
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+	}
+	
+	public void DeclAssignStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getIdDecl().checkNames(err, symbols);
+		getExpr().checkNames(err, symbols); // IF parameters retain old depth
+	}
+	
+	public void DeclStmt.checkNames(PrintStream err, SymbolTable symbols) {
+		getIdDecl().checkNames(err, symbols);
+	}
+	
+	public void FuncUseExpr.checkNames(PrintStream err, SymbolTable symbols) {
+		getIdUseExpr().checkNames(err, symbols);
+		if(hasExpr()) {
+			for(int i = 0; i < getNumExpr(); ++i) {
+				getExpr(i).checkNames(err, symbols);
+			}
+		}
+	}
+	
+	
+//	public void Let.checkNames(PrintStream err, SymbolTable symbols) {
+//		symbols = symbols.push();
+//		for (int i = 0; i < getNumBinding(); ++i) {
+//			getBinding(i).checkNames(err, symbols);
+//		}
+//		getExpr().checkNames(err, symbols);
+//	}
+//
+	public void ReadFunc.checkNames(PrintStream err, SymbolTable symbols) {
+		if (hasDefault()) {
+			getDefault().checkNames(err, symbols.push());
+		}
+	}
+	
+	
+	public void IdDecl.checkNames(PrintStream err, SymbolTable symbols) {
+		if (!symbols.declare(getID())) {
+			err.format("Error at line %d: symbol \'%s\' is already declared!", getLine(), getID());
+			err.println();
+		}
+	}
+	
+	public void IdUseExpr.checkNames(PrintStream err, SymbolTable symbols) {
+		if (!symbols.lookup(getID())) {
+			err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
+			err.println();
+		}
+	}
+
+	/**
+	 * Helper method
+	 * @return line number of this token
+	 */
+	public int ASTNode.getLine() {
+		return getLine(getStart());
+	}
+}

@@ -1,0 +1,8 @@
+int a() {
+	return b(); /* error: b is not yet declared !!DECLARATION ORDER!! */
+}
+int b() {
+	return 1;
+}
+
+/* FEL ORDNING PÅ METODANROP */

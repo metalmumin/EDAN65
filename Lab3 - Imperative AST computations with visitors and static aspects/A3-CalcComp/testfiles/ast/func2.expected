@@ -1,0 +1,15 @@
+Program
+  List
+    FuncDecl
+      IdDecl
+      Opt
+        List
+          IdDecl
+          IdDecl
+      Block
+        Opt
+    FuncDecl
+      IdDecl
+      Opt
+      Block
+        Opt

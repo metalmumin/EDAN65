@@ -1,0 +1,146 @@
+%class "LangParser";
+%package "lang.ast";
+
+%embed {:
+	static public class SyntaxError extends RuntimeException { public SyntaxError(String msg) {super(msg);}}
+	// Disable syntax error recovery
+	protected void recoverFromError(Symbol token, TokenStream in) {
+		throw new SyntaxError("Cannot recover from the syntax error");
+	}
+:};
+
+%terminals WHILE, IF, ELSE, RETURN, LP, RP, LB, RB, ASSIGN, ADD, SUB, MUL,
+DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, READ, PRINT;
+
+%typeof program		= "Program";
+
+%typeof func_decl_list	= "List";
+%typeof func_param_list	= "List";
+%typeof func_expr_list	= "List";
+%typeof stmt_list		= "List";
+
+%typeof add_expr		= "Expr";
+%typeof mul_expr		= "Expr";
+%typeof unary_expr		= "Expr";
+%typeof primary_expr	= "Expr";
+
+%typeof literal			= "Literal";
+%typeof integer_literal = "IntLiteral";
+
+%typeof block 		= "Block";
+%typeof opt_block	= "Opt";
+
+%typeof expr 		= "Expr";
+//%typeof binexpr		= "BinExpr";
+//%typeof condexpr	= "CondExpr";
+//%typeof numexpr 	= "NumExpr";
+
+%typeof stmt		= "Stmt";
+%typeof while		= "WhileStmt";
+%typeof if 			= "IfStmt";
+%typeof return		= "ReturnStmt";
+%typeof assign 		= "AssignStmt";
+%typeof decl 		= "DeclStmt";
+%typeof decl_assign = "DeclAssignStmt";
+%typeof print		= "PrintStmt";
+
+%typeof id_use 		= "IdUseExpr";
+%typeof func_use 	= "FuncUseExpr";
+%typeof id_decl 	= "IdDecl";
+%typeof func_decl	= "FuncDecl";
+
+%typeof func_read	= "ReadFunc";
+
+%goal program;
+
+program = func_decl_list.a {: return new Program(a); :};
+
+func_decl_list =
+		  func_decl.a 						{: return new List().add(a);:}
+		| func_decl_list.a func_decl.b 		{: return a.add(b); 		:}
+		;
+func_param_list =
+		  INT id_decl.a 							{: return new List().add(a);:}
+		| func_param_list.a COMMA INT id_decl.b 	{: return a.add(b); 		:}
+		;
+func_expr_list =
+		  expr.a 							{: return new List(a);		:}
+		| func_expr_list.a COMMA expr.b 	{: return a.add(b); 		:}
+		;
+stmt_list =
+		  stmt.a 							{: return new List().add(a);:}
+		| stmt_list.a stmt.b 				{: return a.add(b);   		:}
+		; 
+func_decl 	= INT id_decl.a LP func_param_list.par RP block.b 	{: return new FuncDecl(a, par, b);  		:}
+			| INT id_decl.a LP RP block.b 						{: return new FuncDecl(a, new List(), b);	:}
+			;
+			
+id_decl 	= ID.id			 									{: return new IdDecl(id); 					:};
+block 		=
+			 LB RB					 		{: return new Block(new List());:}
+			|LB stmt_list.a RB 				{: return new Block(a);		:}
+			;
+			
+opt_block =
+		  ELSE block.a						{: return new Opt(a); 		:}
+		|									{: return new Opt();  		:}
+		;			
+
+stmt	= while | if | return | assign | decl | print | decl_assign;
+
+while 	= WHILE LP expr.a RP block.b				{: return new WhileStmt(a,b);	:};
+if		= IF LP expr.a RP block.b opt_block.c		{: return new IfStmt(a,b,c);	:};
+return 	= RETURN expr.a SEMI						{: return new ReturnStmt(a);	:};
+assign 	= id_use.a ASSIGN expr.b SEMI				{: return new AssignStmt(a,b);	:};
+decl 	= INT id_decl.a SEMI						{: return new DeclStmt(a); 		:};
+print	= PRINT LP expr.a RP SEMI					{: return new PrintStmt(a);		:};
+decl_assign = INT id_decl.a ASSIGN expr.b SEMI			{: return new DeclAssignStmt(a,b);:};
+			
+expr 	= 
+		add_expr
+		|expr.a GT add_expr.b						{: return new GT(a, b); :}
+		|expr.a LT add_expr.b						{: return new LT(a, b); :}
+		|expr.a GE add_expr.b						{: return new GE(a, b); :}
+		|expr.a LE add_expr.b						{: return new LE(a, b); :}
+		|expr.a EQ add_expr.b						{: return new EQ(a, b); :}
+		|expr.a NE add_expr.b						{: return new NE(a, b); :}
+		;
+add_expr =
+		mul_expr
+		|add_expr.a ADD mul_expr.b						{: return new Add(a, b); :}
+		|add_expr.a SUB mul_expr.b						{: return new Sub(a, b); :}
+		;
+		
+mul_expr =
+		unary_expr
+		|mul_expr.a MUL unary_expr.b						{: return new Mul(a, b); :}
+		|mul_expr.a DIV unary_expr.b						{: return new Div(a, b); :}
+		|mul_expr.a MOD unary_expr.b						{: return new Mod(a, b); :}
+		;
+		
+unary_expr = 
+		primary_expr
+		;
+
+primary_expr = 
+		literal
+		| id_use
+		| func_use
+		| func_read
+		;
+literal =
+		integer_literal
+		;
+
+integer_literal = NUMERAL.num						{: return new IntLiteral(num);	:};
+		
+id_use		= ID.id									{: return new IdUseExpr(id);	:};
+func_use	= id_use.a LP func_expr_list.b RP		{: return new FuncUseExpr(a, b);:}
+			| id_use.a LP RP						{: return new FuncUseExpr(a, new List());:}
+			;
+			
+func_read	= READ LP RP							{: return new ReadFunc(new Opt());		:}
+			| READ LP expr.a RP						{: return new ReadFunc(new Opt(a));		:}
+			;
+
+//numexpr = func_use | func_read | int_use | id_use;

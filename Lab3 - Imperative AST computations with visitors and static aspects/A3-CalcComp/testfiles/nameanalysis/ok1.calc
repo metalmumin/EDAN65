@@ -1,0 +1,7 @@
+int main(int b) {
+	return a(); /* okay: a refers to the parameter */
+}
+
+int a() {
+	return 1;
+}
