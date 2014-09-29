@@ -1,6 +1,7 @@
 Program
   List
     FuncDecl
+      IntType
       IdDecl
       List
       Block
@@ -33,22 +34,34 @@ Program
           ReturnStmt
             IdUseExpr
     FuncDecl
+      IntType
       IdDecl
       List
-        IdDecl
-        IdDecl
+        Param
+          IntType
+          IdDecl
+        Param
+          IntType
+          IdDecl
       Block
         List
     FuncDecl
+      IntType
       IdDecl
       List
-        IdDecl
-        IdDecl
+        Param
+          IntType
+          IdDecl
+        Param
+          IntType
+          IdDecl
       Block
         List
           DeclStmt
+            IntType
             IdDecl
           DeclStmt
+            IntType
             IdDecl
           AssignStmt
             IdUseExpr

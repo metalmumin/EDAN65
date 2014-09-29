@@ -9,7 +9,7 @@ int gcd1() {
 	return a;
 }
 
-int gcd2(int a, int b) {
+int gcd2(int a, bool b) {
 }
 
 /* Test two different implementations of GCD algorithms
@@ -17,7 +17,7 @@ int gcd2(int a, int b) {
 * provided that both inputs are positive.
 */
 
-int main(int a, int b) {
+int main(bool a, int b) {
 	int a;
 	int b;
 	a = read();

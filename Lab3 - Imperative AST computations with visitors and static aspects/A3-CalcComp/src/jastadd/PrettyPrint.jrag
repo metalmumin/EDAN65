@@ -18,7 +18,7 @@ aspect PrettyPrint {
 			getChild(i).prettyPrint(out, ind);
 		}
 	}
-
+	public abstract String Type.getType();
 	public abstract String BinExpr.getOperator();
 	public abstract String Expr.prettyString();
 	public String BinExpr.prettyString() {
@@ -28,7 +28,6 @@ aspect PrettyPrint {
 	public void FuncDecl.prettyPrint(PrintStream out, String ind) {
 		out.print("\nint " + getName().prettyString() + "("); 	// TODO: We only have one type
 		for (int i = 0; i < getNumParam(); ++i) {
-			out.print("int ");
 			out.print(getParamList().getChild(i).prettyString());		
 			// When last element - append no comma
 			if(i < getNumParam() - 1) {
@@ -38,6 +37,10 @@ aspect PrettyPrint {
 		out.print(")");
 		getBlock().prettyPrint(out, ind);
 		out.print("\n");
+	}
+	
+	public String Param.prettyString() {
+		return getType().getType() + getIdDecl().prettyString();
 	}
 	
 	/**
@@ -91,7 +94,19 @@ aspect PrettyPrint {
 	public void DeclAssignStmt.prettyPrint(PrintStream out, String ind) {
 		out.print("\n" + ind + "int " + getIdDecl().prettyString() + " = " + getExpr().prettyString() + ";");
 	}
-
+	
+	public String IntType.getType() {
+		return ("int ");
+	}
+	
+	public String BoolType.getType() {
+		return ("bool ");
+	}
+	
+	public String UnknownType.getType() {
+		return ("");
+	}
+	
 	public String Add.getOperator() {
 		return (" + ");
 	}
@@ -145,6 +160,11 @@ aspect PrettyPrint {
 	public String IntLiteral.prettyString() {
 		return getNUMERAL();
 	}
+	
+	public String BoolLiteral.prettyString() {
+		return getBOOLEAN();
+	}
+	
 	public String FuncUseExpr.prettyString() {
 		String s = "";
 		s += getIdUseExpr().prettyString() +"(";

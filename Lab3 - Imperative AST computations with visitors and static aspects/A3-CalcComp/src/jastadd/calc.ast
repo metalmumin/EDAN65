@@ -2,17 +2,24 @@ Program ::= Func*;
 
 abstract Func;
 
-FuncDecl : Func ::= Name:IdDecl Param:IdDecl* Block;
+abstract Type;
+IntType 	: Type ::= <INT>;
+BoolType 	: Type ::= <BOOL>;
+UnknownType : Type;
+
+FuncDecl : Func ::= Type Name:IdDecl Param* Block;
+Param : Func ::= Type IdDecl;
 Block ::= Stmt*;
+
 
 abstract Stmt;
 WhileStmt : Stmt ::= Expr Block;
 IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
 ReturnStmt: Stmt ::= Expr;
 AssignStmt: Stmt ::= IdUseExpr Expr;
-DeclStmt  : Stmt ::= IdDecl;
+DeclStmt  : Stmt ::= Type IdDecl;
 PrintStmt : Stmt ::= Expr;
-DeclAssignStmt : Stmt ::= IdDecl Expr;
+DeclAssignStmt : Stmt ::= Type IdDecl Expr;
 
 abstract Expr;
 abstract BinExpr	: Expr ::= Left:Expr Right:Expr;
@@ -23,6 +30,7 @@ abstract AddExpr	: BinExpr;
 abstract MulExpr	: BinExpr;
 
 IntLiteral : Literal ::= <NUMERAL>;
+BoolLiteral : Literal ::= <BOOLEAN>;
 
 IdUseExpr 	: PrimaryExpr ::= <ID>;
 FuncUseExpr : PrimaryExpr ::= IdUseExpr Expr*;
@@ -41,3 +49,4 @@ EQ  : BinExpr;
 NE  : BinExpr;
 
 IdDecl	::= <ID>;
+UnknownDecl : IdDecl;

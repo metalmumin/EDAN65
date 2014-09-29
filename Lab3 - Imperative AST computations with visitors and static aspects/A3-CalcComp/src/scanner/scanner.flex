@@ -30,7 +30,8 @@ import lang.ast.LangParser.SyntaxError;
 WhiteSpace = [ ] | \t | \f | \n | \r
 ID   = [a-zA-Z]+[a-zA-Z0-9]*
 NUMERAL  = [0-9]+|([0-9]+\.[0-9]+)
-COMMENT ="/*" ~"*/"
+COMMENT = "/*" ~"*/"
+BOOLEAN = "true"|"false"
 
 %%
 
@@ -46,6 +47,7 @@ COMMENT ="/*" ~"*/"
 "read"		{ return sym(Terminals.READ);	}
 "if"		{ return sym(Terminals.IF); 	}
 "int"		{ return sym(Terminals.INT); 	}
+"bool"		{ return sym(Terminals.BOOL); 	}
 "=="		{ return sym(Terminals.EQ); 	}
 "!="		{ return sym(Terminals.NE); 	}
 ">="		{ return sym(Terminals.GE); 	}
@@ -65,6 +67,7 @@ COMMENT ="/*" ~"*/"
 "{"			{ return sym(Terminals.LB); 	}
 "}"			{ return sym(Terminals.RB); 	}
 {NUMERAL}	{ return sym(Terminals.NUMERAL);}
+{BOOLEAN}	{ return sym(Terminals.BOOLEAN);}
 {ID}		{ return sym(Terminals.ID); 	}
 <<EOF>>		{ return sym(Terminals.EOF); 	}
 

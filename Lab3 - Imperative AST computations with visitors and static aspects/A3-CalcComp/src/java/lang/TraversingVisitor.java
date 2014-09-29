@@ -31,6 +31,9 @@ public abstract class TraversingVisitor implements lang.ast.Visitor {
 	public Object visit(Block node, Object data){
 		return visitChildren(node, data);
 	}
+	public Object visit(Param node, Object data){
+		return visitChildren(node, data);
+	}
 	
 	//STMT:s
 	public Object visit(IfStmt node, Object data){
@@ -51,12 +54,25 @@ public abstract class TraversingVisitor implements lang.ast.Visitor {
 	public Object visit(WhileStmt node, Object data){
 		return visitChildren(node, data);
 	}
-	
 	public Object visit(DeclAssignStmt node, Object data){
 		return visitChildren(node, data);
 	}
 	
+	//Type
+	public Object visit(IntType node, Object data){
+		return visitChildren(node, data);
+	}
+	public Object visit(BoolType node, Object data){
+		return visitChildren(node, data);
+	}
+	public Object visit(UnknownType node, Object data){
+		return visitChildren(node, data);
+	}
+	
 	// Expr	
+	public Object visit(BoolLiteral node, Object data){
+		return visitChildren(node, data);
+	}
 	public Object visit(IntLiteral node, Object data){
 		return visitChildren(node, data);
 	}
@@ -107,37 +123,11 @@ public abstract class TraversingVisitor implements lang.ast.Visitor {
 		return visitChildren(node, data);
 	}
 	
+	// Declarations
 	public Object visit(IdDecl node, Object data) {
 		return visitChildren(node, data);
 	}
-//	public Object visit(List node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Opt node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Program node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Mul node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Div node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Numeral node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(IdUse node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Let node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Binding node, Object data) {
-//		return visitChildren(node, data);
-//	}
-//	public Object visit(Ask node, Object data) {
-//		return visitChildren(node, data);
-//	}
+	public Object visit(UnknownDecl node, Object data) {
+		return visitChildren(node, data);
+	}
 }

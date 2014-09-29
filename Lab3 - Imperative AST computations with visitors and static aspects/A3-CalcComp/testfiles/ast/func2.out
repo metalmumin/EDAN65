@@ -1,13 +1,19 @@
 Program
   List
     FuncDecl
+      IntType
       IdDecl
       List
-        IdDecl
-        IdDecl
+        Param
+          IntType
+          IdDecl
+        Param
+          IntType
+          IdDecl
       Block
         List
     FuncDecl
+      IntType
       IdDecl
       List
       Block
