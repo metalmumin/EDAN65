@@ -2,7 +2,6 @@ import java.io.PrintStream;
 
 aspect PrettyPrint {
 	
-	
 	public void Program.prettyPrint(PrintStream out) {
 		out.print ("");
 		String ind = "";
@@ -20,16 +19,20 @@ aspect PrettyPrint {
 		}
 	}
 
+	public abstract String BinExpr.getOperator();
+	public abstract String Expr.prettyString();
+	public String BinExpr.prettyString() {
+		return getLeft().prettyString() +  getOperator() + getRight().prettyString();
+	}
+	
 	public void FuncDecl.prettyPrint(PrintStream out, String ind) {
-		out.print("\nint "); 												// TODO: We only have one type
-		getName().prettyPrint(out, ind);
-		out.print("(");
+		out.print("\nint " + getName().prettyString() + "("); 	// TODO: We only have one type
 		for (int i = 0; i < getNumParam(); ++i) {
 			out.print("int ");
-			getParamList().getChild(i).prettyPrint(out, ind);		
+			out.print(getParamList().getChild(i).prettyString());		
 			// When last element - append no comma
 			if(i < getNumParam() - 1) {
-				out.print(",");
+				out.print(", ");
 			}
 		}
 		out.print(")");
@@ -53,223 +56,109 @@ aspect PrettyPrint {
 	}
 	
 	public void WhileStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("while(");
-		getExpr().prettyPrint(out, ind);
-		out.print(")");
+		out.print("\n" + ind + "while(" + getExpr().prettyString());
 		getBlock().prettyPrint(out, ind);	
 	}
 	
 	public void IfStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("if(");
-		getExpr().prettyPrint(out, ind);	
-		out.print(")");
-		getThen().prettyPrint(out, ind);
-		//out.print(ind);
-		if(hasElse()){
+		if(!hasElse()) {
+			out.print("\n" + ind + "if(" + getExpr().prettyString() + ")");
+			getThen().prettyPrint(out, ind);
+		} else {
+			out.print("\n" + ind + "if(" + getExpr().prettyString() + ")");
+			getThen().prettyPrint(out, ind);
 			out.print(" else");
 			getElse().prettyPrint(out, ind);
 		}
 	}
 	
 	public void ReturnStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("return ");
-		getExpr().prettyPrint(out, ind);
-		out.print(";");
+		out.print("\n" + ind + "return " + getExpr().prettyString() + ";");
 	}
 	
 	public void AssignStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		getIdUseExpr().prettyPrint(out, ind);
-		out.print(" = ");
-		getExpr().prettyPrint(out, ind);
-		out.print(";");
+		out.print("\n" + ind + getIdUseExpr().prettyString()  + " = " + getExpr().prettyString() + ";");
 	}
 	
 	public void DeclStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("int ");
-		getIdDecl().prettyPrint(out, ind);
-		out.print(";");
+		out.print("\n" + ind + "int " + getIdDecl().prettyString() + ";");
 	}
 	
 	public void PrintStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("print(");
-		getExpr().prettyPrint(out, ind);
-		out.print(")");
-		out.print(";");
+		out.print("\n" + ind + "print(" + getExpr().prettyString() + ");");
 	}
 	
 	public void DeclAssignStmt.prettyPrint(PrintStream out, String ind) {
-		out.print("\n" + ind);
-		out.print("int ");
-		getIdDecl().prettyPrint(out, ind);
-		out.print(" = ");
-		getExpr().prettyPrint(out, ind);
-		out.print(";");
+		out.print("\n" + ind + "int " + getIdDecl().prettyString() + " = " + getExpr().prettyString() + ";");
 	}
 
-	public void Add.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" + ");
-		getRight().prettyPrint(out, ind);
+	public String Add.getOperator() {
+		return (" + ");
 	}
 	
-	public void Sub.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" - ");
-		getRight().prettyPrint(out, ind);
+	public String Sub.getOperator() {
+		return (" - ");
 	}
 	
-	public void Mul.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" * ");
-		getRight().prettyPrint(out, ind);
+	public String Mul.getOperator() {
+		return (" * ");
 	}
 
-	public void Div.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" / ");
-		getRight().prettyPrint(out, ind);
+	public String Div.getOperator() {
+		return (" / ");
 	}
 
-	public void Mod.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" % ");
-		getRight().prettyPrint(out, ind);
+	public String Mod.getOperator() {
+		return (" % ");
 	}
-	public void GT.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" > ");
-		getRight().prettyPrint(out, ind);
+	public String GT.getOperator() {
+		return (" > ");
 	}
 	
-	public void LT.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" < ");
-		getRight().prettyPrint(out, ind);
+	public String LT.getOperator() {
+		return (" < ");
 		
 	}	
-	public void GE.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" >= ");
-		getRight().prettyPrint(out, ind);
+	public String GE.getOperator() {
+		return (" >= ");
 	}
-	public void LE.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" <= ");
-		getRight().prettyPrint(out, ind);
+	public String LE.getOperator() {
+		return (" <= ");
 	}
 	
-	public void EQ.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" == ");
-		getRight().prettyPrint(out, ind);
+	public String EQ.getOperator() {
+		return (" == ");
 	}
 	
-	public void NE.prettyPrint(PrintStream out, String ind) {
-		getLeft().prettyPrint(out, ind);
-		out.print(" != ");
-		getRight().prettyPrint(out, ind);
+	public String NE.getOperator() {
+		return (" != ");
+	}
+	
+	public String IdUseExpr.prettyString() {
+		return getID();
 	}
 
-	public void IdUseExpr.prettyPrint(PrintStream out, String ind) {
-		out.print(getID());
-	}
-
-	public void IdDecl.prettyPrint(PrintStream out, String ind) {
-		out.print(getID());
+	public String IdDecl.prettyString() {
+		return getID();
 	}
 	
-	public void IntLiteral.prettyPrint(PrintStream out, String ind) {
-		out.print(getNUMERAL());
+	public String IntLiteral.prettyString() {
+		return getNUMERAL();
 	}
-	public void FuncUseExpr.prettyPrint(PrintStream out, String ind) {
-		getIdUseExpr().prettyPrint(out, ind);
-		out.print("(");
+	public String FuncUseExpr.prettyString() {
+		String s = "";
+		s += getIdUseExpr().prettyString() +"(";
 		for(int i = 0; i < getNumExpr(); ++i) {			
-			getExpr(i).prettyPrint(out, ind);
-			// When last element - append no comma
+			s += getExpr(i).prettyString();
 			if(i < getNumExpr() - 1) {
-				out.print(",");
+				s += ", ";
 			}
 		}
-		out.print(")");
-		
+		s += ")";
+		return s;
 	}
 	
-	public void ReadFunc.prettyPrint(PrintStream out, String ind) {
-		out.print("read()");
+	public String ReadFunc.prettyString() {
+		return "read()";
 	}
 }
-
-//import java.io.PrintStream;
-//
-//aspect PrettyPrint {
-//	public void ASTNode.prettyPrint(PrintStream out) {
-//		prettyPrint(out, "");
-//		out.println();
-//	}
-//
-//	public void ASTNode.prettyPrint(PrintStream out, String ind) {
-//		for (int i = 0; i < getNumChild(); ++i) {
-//			getChild(i).prettyPrint(out, ind);
-//		}
-//	}
-//
-//	public void Mul.prettyPrint(PrintStream out, String ind) {
-//		getLeft().prettyPrint(out, ind);
-//		out.print(" * ");
-//		getRight().prettyPrint(out, ind);
-//	}
-//
-//	public void Div.prettyPrint(PrintStream out, String ind) {
-//		getLeft().prettyPrint(out, ind);
-//		out.print(" / ");
-//		getRight().prettyPrint(out, ind);
-//	}
-////
-////	public void Numeral.prettyPrint(PrintStream out, String ind) {
-////		out.print(getNUMERAL());
-////	}
-////
-////	public void IdUse.prettyPrint(PrintStream out, String ind) {
-////		out.print(getID());
-////	}
-//
-////	public void IdDecl.prettyPrint(PrintStream out, String ind) {
-////		out.print(getID());
-////	}
-////
-////	public void Let.prettyPrint(PrintStream out, String ind) {
-////		out.println("let");
-////		for (int i = 0; i < getNumBinding(); ++i) {
-////			out.print(ind+"  ");
-////			getBinding(i).prettyPrint(out, ind+"  ");
-////			out.println();
-////		}
-////		out.println(ind + "in");
-////		out.print(ind+"  ");
-////		getExpr().prettyPrint(out, ind+"  ");
-////		out.println();
-////		out.print(ind + "end");
-////	}
-////
-////	public void Binding.prettyPrint(PrintStream out, String ind) {
-////		getIdDecl().prettyPrint(out, ind);
-////		out.append(" = ");
-////		getExpr().prettyPrint(out, ind+"    ");
-////	}
-////
-////	public void Ask.prettyPrint(PrintStream out, String ind) {
-////		out.print("ask user");
-////		if (hasDefault()) {
-////			out.print(" [");
-////			getDefault().prettyPrint(out, ind+"    ");
-////			out.print("]");
-////		}
-////	}
-//}

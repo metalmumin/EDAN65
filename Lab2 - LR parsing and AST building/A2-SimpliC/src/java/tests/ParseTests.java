@@ -9,8 +9,28 @@ public class ParseTests extends AbstractTestSuite {
 	}
 
 	@Test
-	public void example() {
-		testValidSyntax("example.lang");
+	public void func1() {
+		testValidSyntax("func1.lang");
+	}
+	
+	@Test
+	public void func2() {
+		testValidSyntax("func2.lang");
+	}
+	
+	@Test
+	public void func3() {
+		testValidSyntax("func3.lang");
+	}
+	
+	@Test
+	public void arithmetic() {
+		testValidSyntax("arithmetic.lang");
+	}
+	
+	@Test
+	public void extended() {
+		testValidSyntax("extended.lang");
 	}
 
 	@Test

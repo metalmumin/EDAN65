@@ -2,78 +2,73 @@ Program
   List
     FuncDecl
       IdDecl
-      Opt
+      List
       Block
-        Opt
-          List
-            WhileStmt
-              NE
-                IdUseExpr
-                IdUseExpr
-              Block
-                Opt
-                  List
-                    IfStmt
-                      GT
-                        IdUseExpr
-                        IdUseExpr
-                      Block
-                        Opt
-                          List
-                            AssignStmt
-                              IdUseExpr
-                              Sub
-                                IdUseExpr
-                                IdUseExpr
-                      Opt
-                        Block
-                          Opt
-                            List
-                              AssignStmt
-                                IdUseExpr
-                                Sub
-                                  IdUseExpr
-                                  IdUseExpr
-            ReturnStmt
+        List
+          WhileStmt
+            NE
               IdUseExpr
+              IdUseExpr
+            Block
+              List
+                IfStmt
+                  GT
+                    IdUseExpr
+                    IdUseExpr
+                  Block
+                    List
+                      AssignStmt
+                        IdUseExpr
+                        Sub
+                          IdUseExpr
+                          IdUseExpr
+                  Opt
+                    Block
+                      List
+                        AssignStmt
+                          IdUseExpr
+                          Sub
+                            IdUseExpr
+                            IdUseExpr
+          ReturnStmt
+            IdUseExpr
     FuncDecl
       IdDecl
-      Opt
-        List
-          IdDecl
-          IdDecl
+      List
+        IdDecl
+        IdDecl
       Block
-        Opt
+        List
     FuncDecl
       IdDecl
-      Opt
-        List
-          IdDecl
-          IdDecl
+      List
+        IdDecl
+        IdDecl
       Block
-        Opt
-          List
-            DeclStmt
-              IdDecl
-            DeclStmt
-              IdDecl
-            AssignStmt
+        List
+          DeclStmt
+            IdDecl
+          DeclStmt
+            IdDecl
+          AssignStmt
+            IdUseExpr
+            ReadFunc
+              Opt
+          AssignStmt
+            IdUseExpr
+            ReadFunc
+              Opt
+          PrintStmt
+            FuncUseExpr
               IdUseExpr
-              ReadFunc
-            AssignStmt
+              List
+                IdUseExpr
+                IdUseExpr
+          PrintStmt
+            FuncUseExpr
               IdUseExpr
-              ReadFunc
-            PrintStmt
-              FuncUseExpr
+              List
                 IdUseExpr
-                List
-                  IdUseExpr
-                  IdUseExpr
-            PrintStmt
-              FuncUseExpr
                 IdUseExpr
-                List
-                  IdUseExpr
-                  IdUseExpr
-            ReturnStmt
-              IntLiteral
+          ReturnStmt
+            IntLiteral

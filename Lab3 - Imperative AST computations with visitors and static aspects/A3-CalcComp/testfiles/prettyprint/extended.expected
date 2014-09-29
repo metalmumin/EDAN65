@@ -1,6 +1,6 @@
 
 int gcd1() { 
- while(a != b) {  
+ while(a != b {  
   if(a > b) {   
    a = a - b;
   } else {   
@@ -10,15 +10,15 @@ int gcd1() {
  return a;
 }
 
-int gcd2(int a,int b) { 
+int gcd2(int a, int b) { 
 }
 
-int main(int a,int b) { 
+int main(int a, int b) { 
  int a;
  int b;
  a = read();
  b = read();
- print(gcd1(a,b));
- print(gcd2(a,b));
+ print(gcd1(a, b));
+ print(gcd2(a, b));
  return 0;
 }

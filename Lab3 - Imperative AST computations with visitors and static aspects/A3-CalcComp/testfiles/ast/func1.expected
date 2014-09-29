@@ -2,6 +2,6 @@ Program
   List
     FuncDecl
       IdDecl
-      Opt
+      List
       Block
-        Opt
+        List

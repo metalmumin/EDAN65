@@ -2,14 +2,13 @@ Program
   List
     FuncDecl
       IdDecl
-      Opt
-        List
-          IdDecl
-          IdDecl
+      List
+        IdDecl
+        IdDecl
       Block
-        Opt
+        List
     FuncDecl
       IdDecl
-      Opt
+      List
       Block
-        Opt
+        List

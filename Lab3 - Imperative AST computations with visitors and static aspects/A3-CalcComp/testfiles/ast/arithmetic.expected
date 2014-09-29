@@ -2,20 +2,19 @@ Program
   List
     FuncDecl
       IdDecl
-      Opt
+      List
       Block
-        Opt
-          List
-            AssignStmt
-              IdUseExpr
-              Sub
-                Add
-                  IdUseExpr
+        List
+          AssignStmt
+            IdUseExpr
+            Sub
+              Add
+                IdUseExpr
+                Mul
                   Mul
                     Mul
-                      Mul
-                        IdUseExpr
-                        IntLiteral
                       IdUseExpr
-                    IntLiteral
-                IntLiteral
+                      IntLiteral
+                    IdUseExpr
+                  IntLiteral
+              IntLiteral

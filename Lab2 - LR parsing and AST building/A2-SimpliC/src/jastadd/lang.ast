@@ -1,38 +1,42 @@
 Program ::= Func*;
 
 abstract Func;
-FuncDecl : Func ::= IdDecl Param* Block;
-Param ::= IdUseExpr;
-Block ::= Stmt*;
+
+FuncDecl : Func ::= Name:IdDecl [Param:IdDecl] Block;
+Block ::= [Stmt];
 
 abstract Stmt;
-WhileStmt : Stmt ::= CondExpr Block;
-IfStmt	  : Stmt ::= CondExpr Then:Block [Else:Block];
+WhileStmt : Stmt ::= Expr Block;
+IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
 ReturnStmt: Stmt ::= Expr;
 AssignStmt: Stmt ::= IdUseExpr Expr;
 DeclStmt  : Stmt ::= IdDecl;
 PrintStmt : Stmt ::= Expr;
 
 abstract Expr;
-abstract NumExpr : Expr;
-abstract BinExpr : Expr ::= Left:Expr Right:Expr;
-abstract CondExpr: BinExpr;
+abstract BinExpr	: Expr ::= Left:Expr Right:Expr;
+abstract UnaryExpr	: Expr;
+abstract PrimaryExpr: UnaryExpr; 
+abstract Literal	: PrimaryExpr;
+abstract AddExpr	: BinExpr;
+abstract MulExpr	: BinExpr;
 
-IdUseExpr 	: NumExpr ::= <ID>;
-IntUseExpr	: NumExpr ::= <NUMERAL>;
-FuncUseExpr : NumExpr ::= IdUseExpr Expr*;
-ReadFunc    : Expr;
+IntLiteral : Literal ::= <NUMERAL>;
 
-Add : BinExpr;
-Sub : BinExpr;
-Mul : BinExpr;
-Div : BinExpr;
-Mod : BinExpr;
-GT  : CondExpr;
-LT  : CondExpr;
-GE  : CondExpr;
-LE  : CondExpr;
-EQ  : CondExpr;
-NE  : CondExpr;
+IdUseExpr 	: PrimaryExpr ::= <ID>;
+FuncUseExpr : PrimaryExpr ::= IdUseExpr Expr*;
+ReadFunc    : PrimaryExpr;
+
+Add : AddExpr;
+Sub : AddExpr;
+Mul : MulExpr;
+Div : MulExpr;
+Mod : MulExpr;
+GT  : BinExpr;
+LT  : BinExpr;
+GE  : BinExpr;
+LE  : BinExpr;
+EQ  : BinExpr;
+NE  : BinExpr;
 
 IdDecl	::= <ID>;
