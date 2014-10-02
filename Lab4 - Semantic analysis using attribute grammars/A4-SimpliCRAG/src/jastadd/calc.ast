@@ -5,14 +5,14 @@ abstract Func;
 abstract Type;
 IntType 	: Type ::= <INT>;
 BoolType 	: Type ::= <BOOL>;
-UnknownType : Type;
+UnknownType : Type ::= <ID>;
 
-FuncDecl : Func ::= Type Name:IdDecl Param* Block;
-Param : Func ::= Type IdDecl;
-Block ::= Stmt*;
-
+FuncDecl : Func ::= Type Name:FuncIdDecl Param* Block;
 
 abstract Stmt;
+Param : Stmt ::= Type IdDecl;
+Block : Stmt ::= Stmt*;
+
 WhileStmt : Stmt ::= Expr Block;
 IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
 ReturnStmt: Stmt ::= Expr;
@@ -50,3 +50,8 @@ NE  : BinExpr;
 
 IdDecl	::= <ID>;
 UnknownDecl : IdDecl;
+
+FuncIdDecl	::= <ID>;
+UnknownFunc : FuncIdDecl;
+
+ 

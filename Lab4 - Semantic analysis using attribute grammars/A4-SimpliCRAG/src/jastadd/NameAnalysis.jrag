@@ -2,181 +2,223 @@ import java.util.Set;
 import java.util.HashSet;
 
 aspect NameAnalysis {
-	public class SymbolTable {
-		private static final SymbolTable BOTTOM = new SymbolTable() {
-			@Override
-			public boolean declare(String name) {
-				throw new UnsupportedOperationException(
-						"can not add name to bottom of name stack");
-			}
-			@Override
-			public boolean lookup(String name) {
-				return false;
-			}
-		};
-
-		private final SymbolTable tail;
-		private int depth = 0;
-		private final Set<String> names = new HashSet<String>();
-
-		public SymbolTable() {
-			tail = BOTTOM;
-		}
-
-		public SymbolTable(SymbolTable tail) {
-			this.tail = tail;
-		}
-
-		/**
-		 * Attempt to add a new name to the symbol table.
-		 * @return true if name was not already declared
-		 */
-		public boolean declare(String name) {
-			return names.add(name);
-		}
-
-		/**
-		 * @return true if name has been declared
-		 */
-		public boolean lookup(String name) {
-			return names.contains(name) || tail.lookup(name);
-		}
-
-		/**
-		 * Push a new table on the stack.
-		 * @return the new top of the stack
-		 */
-		public SymbolTable push() {
-			increaseDepth();
-			return new SymbolTable(this);
-		}
-		
-		public void setDepth(int depth) {
-			this.depth = depth;
-		}
-		
-		public int getDepth() {
-			return this.depth;
-		}
-		
-		private void increaseDepth() {
-			this.depth += 1;
-		}
-	}
-
-	/**
-	 * @param err where to write error messages
+/**
+ * Lookup-pattern: IdDecl
+ */
+	eq Program.getChild().lookup(String name) = unknownDecl();
+	
+    /**
+	 * IdUseExpr: Start lookup-pattern
 	 */
-	public void Program.checkNames(PrintStream err) {
-		SymbolTable symbols = new SymbolTable();
-		if(hasFunc()) {
-			for(int i = 0; i < getNumFunc(); ++i) {
-				getFunc(i).checkNames(err, symbols);
-			}
+	syn IdDecl IdUseExpr.decl() {
+		if(this.getParent() instanceof FuncUseExpr) {
+			return new IdDecl(); // "ignore" FuncUseExpr node  	
+		} else {
+			return lookup(getID());	
 		}
 	}
-
+	inh IdDecl IdUseExpr.lookup(String name);
+	
 	/**
-	 * @param err where to write error messages
-	 * @param symbols symbol table
+	 * IdDecl: Start isMultiplyDeclared lookup-pattern
 	 */
-	public void ASTNode.checkNames(PrintStream err, SymbolTable symbols) {
-		for (int i = 0; i < getNumChild(); ++i) {
-			getChild(i).checkNames(err, symbols);
-		}
-	}
-
-	/**
-	 *  MALL FÖR HUR DEPTH PROPAGERAS 
-	 **/
-	public void FuncDecl.checkNames(PrintStream err, SymbolTable symbols) {
-		getName().checkNames(err, symbols);
-		if(hasParam()) {
-			symbols = symbols.push();
-			for(int i = 0; i < getNumParam(); ++i) {
-				getParam(i).checkNames(err, symbols);
-			}
-			getBlock().checkNames(err, symbols);
-		}
+	inh IdDecl IdDecl.lookup(String name);
+	syn boolean IdDecl.isMultiplyDeclared() {
+		System.out.println("DEBUG: isMultiplyDeclared is checking if '" + getID() + "' is multiply declared.");
+		return lookup(getID()) != this;
 	}
 	
-	public void IfStmt.checkNames(PrintStream err, SymbolTable symbols) {
-		getExpr().checkNames(err, symbols); // IF parameters retain old depth
-		
-		// THEN and ELSE blocks have the same depth, but different symsbol tables 
-		getThen().checkNames(err, symbols.push()); // analyse Then:Block 
-		if(hasElse())  {					// analyse Else:Block, but only if Else:Block exists
-			getElse().checkNames(err, symbols.push());
-		}
-	}
 	
 	/**
-	 * WhileStmt : Stmt ::= Expr Block;		NOTE: WHILE PARAMETERS ARE NOT ACCESSIBLE IN WHILE BLOCK!! INFINITE LOOP!
+	 * Abstract Stmt
 	 */
-	public void WhileStmt.checkNames(PrintStream err, SymbolTable symbols) {
-		getExpr().checkNames(err, symbols); // IF parameters retain old depth
-		getBlock().checkNames(err, symbols.push()); // analyse Then:Block 
-	}
-	
-	public void IdDecl.checkNames(PrintStream err, SymbolTable symbols) {
-		if (!symbols.declare(getID())) {
-			err.format("Error at line %d: symbol \'%s\' is already declared!", getLine(), getID());
-			err.println();
-		}
-	}
-	
-	public void IdUseExpr.checkNames(PrintStream err, SymbolTable symbols) {
-		if (!symbols.lookup(getID())) {
-			err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
-			err.println();
-		}
-	}
-
-	/**
-	 * Helper method
-	 * @return line number of this token
-	 */
-	public int ASTNode.getLine() {
-		return getLine(getStart());
-	}
-}
-/*
-aspect NameAnalysis {
-	syn IdDecl IdUse.decl() = lookup(getID());
-	inh IdDecl IdUse.lookup(String name);
-	
-	eq Let.getExpr().lookup(String name) {
-		IdDecl decl = localLookup(name, getNumBinding()-1);
+	inh IdDecl Stmt.lookup(String name); // ask parent
+	eq  Stmt.getChild().lookup(String name) { // do a custom - node-specific lookup for all children
+		IdDecl decl = localLookup(name);
 		return !decl.isUnknown() ? decl : lookup(name);
 	}
-	eq Program.getChild().lookup(String name) = unknownDecl();
-	inh IdDecl Let.lookup(String name);
+	syn IdDecl Stmt.localLookup(String name) { return unknownDecl(); } // because by default a *Stmt has no Decls - return unknownDecl()
 
-	syn IdDecl Let.localLookup(String name, int until) {
+	/**
+	 * Block : Stmt
+	 * Lookup List<Stmt>. No? Ask parent.	
+	 */
+	eq  Block.getStmt(int index).lookup(String name) {
+		IdDecl decl = localLookup(name, index-1);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	syn IdDecl Block.localLookup(String name, int until) {
 		for (int i = 0; i <= until; i++) {
-			if (getBinding(i).getIdDecl().getID().equals(name)) {
-				return getBinding(i).getIdDecl();
+			IdDecl decl = getStmt(i).localLookup(name);
+			if (decl.getID().equals(name)) {
+				return decl;
 			}
 		}
 		return unknownDecl();
 	}
 
-	eq Let.getBinding(int index).lookup(String name) {
-		IdDecl decl = localLookup(name, index);
+	/**
+	 * DeclStmt : Stmt
+	 */
+	eq  DeclStmt.getIdDecl().lookup(String name) {
+		IdDecl decl = localLookup(name);
 		return !decl.isUnknown() ? decl : lookup(name);
 	}
+	syn IdDecl DeclStmt.localLookup(String name) {
+		if(getIdDecl().getID().equals(name))
+			return getIdDecl();
+		
+		return unknownDecl();
+	}
+	
+	/**
+	 * DeclAssignStmt : Stmt
+	 */
+	eq  DeclAssignStmt.getIdDecl().lookup(String name) {
+		IdDecl decl = localLookup(name);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	syn IdDecl DeclAssignStmt.localLookup(String name) {
+		if(getIdDecl().getID().equals(name))
+			return getIdDecl();
+		
+		return unknownDecl();
+	}
+/**
+ * End Stmt.
+ */
+	
+	/**
+	 * FuncDecl : Func
+	 */
+	inh IdDecl FuncDecl.lookup(String name);
+	eq FuncDecl.getChild().lookup(String name) { // makes an "arc" to both Block and List<Param> nodes 
+		IdDecl decl = localLookup(name);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	syn IdDecl FuncDecl.localLookup(String name) {
+		for (Param par : getParams()) {
+			if (par.getIdDecl().getID().equals(name)) {
+				System.out.println("DEBUG: FuncDecl looking for '" + name + "'. Found: '" + par.getIdDecl().getID() + "'");
+				return par.getIdDecl();
+			}
+		}
+		return unknownDecl();
+	}
+	
+/**
+ * Find FuncDecl
+ */
+	/**
+	 * FuncIdDecl	::= <ID>;
+	 */
+	inh FuncIdDecl Func.func(String name);
+	syn FuncIdDecl Func.localFunc(String name) {
+		return unknownFunc();
+	}
+	
+	syn FuncIdDecl FuncDecl.localFunc(String name) {
+		FuncIdDecl decl = getName();
+		return !decl.isUnknown() ? decl : func(name);
+	}
+	
+	/**
+	 * FuncUseExpr : PrimaryExpr
+	 */
+	eq Program.getFunc(int index).func(String name) {
+		FuncIdDecl decl = localFunc(name, index);
+		return !decl.isUnknown() ? decl : unknownFunc();
+	}
+	syn FuncIdDecl Program.localFunc(String name, int until) {
+		for (int i = 0; i <= until; i++) {
+			FuncIdDecl decl = getFunc(i).localFunc(name);
+			System.out.println("DEBUG: Program looking for function '" + name + "'. Found: '" + decl.getID() + "'");
+			if (decl.getID().equals(name)) {
+				return decl;
+			}
+		}
+		return unknownFunc();
+	}
 
-	inh IdDecl IdDecl.lookup(String name);
-	syn boolean IdDecl.isMultiplyDeclared() = lookup(getID()) != this;
+	/**
+	 * Start lookup pattern isMultiplyDeclared - (foreach)
+	 */
+	inh FuncIdDecl FuncIdDecl.func(String name);
+	syn boolean FuncIdDecl.isMultiplyDeclared() = func(getID()) != this;
+	
+	/**
+	 * Start lookup pattern FuncUseExpr - for(index-1)
+	 */
+	inh FuncIdDecl FuncUseExpr.func(String name);
+	syn FuncIdDecl FuncUseExpr.decl() = func(getIdUseExpr().getID());
+	
+/**
+ * TYPE CHECK
+ * IdUse -> (lookup) -> IdDecl -> Type
+ */
+	eq Program.getChild().typeLookup() = unknownType();
+	
+	/**
+	 * Helper functions
+	 */
+	syn String Type.type() = unknownType().getType();
+	syn String IntType.type() = getINT();
+	syn String BoolType.type() = getBOOL();
+	
+	/**
+	 * Abstract Expr
+	 */
+	inh Type Expr.typeLookup();	// ask parent
+	eq  Expr.getChild().typeLookup() { 	// do a custom - node-specific lookup for all children
+		Type t = type();
+		return !t.isUnknownType() ? t : typeLookup();
+	}
+	syn Type Expr.type() {
+		System.out.println("DEBUG: Expr debug");
+		return unknownType();
+		} 
+
+	
+//	syn Type IntLiteral.type() = new IntType();
+//	syn Type BoolLiteral.type() = new BoolType();
+	inh Type Param.typeLookup();
+	eq Param.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
+	inh Type DeclAssignStmt.typeLookup();
+	eq DeclAssignStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
+	inh Type DeclStmt.typeLookup();
+	eq DeclStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
+	
+	inh Type IdDecl.typeLookup();
+	syn Type IdDecl.type() = typeLookup();
+	inh Type FuncIdDecl.typeLookup();
+	syn Type FuncIdDecl.type() = typeLookup();
+	
+	syn Type IdUseExpr.type() = decl().type();
+	syn Type FuncUseExpr.type() = decl().type();
+	
+	syn boolean AssignStmt.compatibleTypes() {
+	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdUseExpr().type().type() + "' and '" + getExpr().type().type() + "'");
+	return	getIdUseExpr().type().isUnknownType() 	||
+			getExpr().type().isUnknownType()		||
+			getIdUseExpr().type().type().equals(getExpr().type().type());
+	
+	}
+	
+	syn boolean DeclAssignStmt.compatibleTypes() {
+	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdDecl().type().type() + "' and '" + getExpr().type().type() + "'");
+	return	getIdDecl().type().isUnknownType() 	||
+			getExpr().type().isUnknownType()		||
+			getIdDecl().type().type().equals(getExpr().type().type());
+	
+	}
 }
 
 aspect CircularDefinitions {
-	// Identify circular definitions in let expressions 
-	syn boolean IdUse.isCircular() = inExprOf(decl());
-	inh boolean IdUse.inExprOf(IdDecl decl);
-	inh boolean Binding.inExprOf(IdDecl decl);
-	eq Binding.getExpr().inExprOf(IdDecl decl)
+	/* Identify circular definitions in DeclAssignStmt statements */
+	syn boolean IdUseExpr.isCircular() = inExprOf(decl());
+	inh boolean IdUseExpr.inExprOf(IdDecl decl);
+	inh boolean Stmt.inExprOf(IdDecl decl);
+	eq DeclAssignStmt.getExpr().inExprOf(IdDecl decl)
 		= getIdDecl() == decl || inExprOf(decl);
 	eq Program.getChild().inExprOf(IdDecl decl) = false;
 }
-*/

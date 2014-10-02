@@ -1,28 +1,5 @@
-int gcd1() {
-	while (a != b) {
-		if (a > b) {
-			int a = a - b;
-		} else {
-			b = b - a;
-		}
-	}
-	return a;
-}
-
-int gcd2(int a, bool b) {
-}
-
-/* Test two different implementations of GCD algorithms
-* and print the result. The results should be equal
-* provided that both inputs are positive.
-*/
-
-int main(bool a, int b) {
-	int a;
-	int b;
-	a = read();
-	b = read();
-	print(gcd1(a, b));
-	print(gcd2(a, b));
-	return 0;
+int gcd2(bool x) {
+	int y;
+	y = 1;
+	x = y;
 }

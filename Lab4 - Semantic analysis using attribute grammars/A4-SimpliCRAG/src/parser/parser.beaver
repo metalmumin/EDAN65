@@ -54,6 +54,7 @@ DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, READ, PRINT, BO
 %typeof id_use 		= "IdUseExpr";
 %typeof func_use 	= "FuncUseExpr";
 %typeof id_decl 	= "IdDecl";
+%typeof func_id_decl = "FuncIdDecl";
 %typeof func_decl	= "FuncDecl";
 
 %typeof func_read	= "ReadFunc";
@@ -78,8 +79,8 @@ stmt_list =
 		  stmt.a 							{: return new List().add(a);:}
 		| stmt_list.a stmt.b 				{: return a.add(b);   		:}
 		; 
-func_decl 	= type.t id_decl.a LP func_param_list.par RP block.b 	{: return new FuncDecl(t, a, par, b);  		:}
-			| type.t id_decl.a LP RP block.b 						{: return new FuncDecl(t, a, new List(), b);	:}
+func_decl 	= type.t func_id_decl.a LP func_param_list.par RP block.b 	{: return new FuncDecl(t, a, par, b);  		:}
+			| type.t func_id_decl.a LP RP block.b 						{: return new FuncDecl(t, a, new List(), b);	:}
 			;
 param = type.a id_decl.b {: return new Param(a,b); :};
 			
@@ -88,7 +89,9 @@ type = int_type | bool_type;
 int_type = INT.t {: return new IntType(t); :};
 bool_type = BOOL.t {: return new BoolType(t); :};
 			
-id_decl 	= ID.id			 									{: return new IdDecl(id); 					:};
+id_decl 	= ID.id			 										{: return new IdDecl(id); 					:};
+func_id_decl 	= ID.id			 									{: return new FuncIdDecl(id); 					:};
+
 block 		=
 			 LB RB					 		{: return new Block(new List());:}
 			|LB stmt_list.a RB 				{: return new Block(a);		:}

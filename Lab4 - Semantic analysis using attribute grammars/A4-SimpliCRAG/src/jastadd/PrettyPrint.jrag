@@ -157,6 +157,10 @@ aspect PrettyPrint {
 		return getID();
 	}
 	
+	public String FuncIdDecl.prettyString() {
+		return getID();
+	}
+	
 	public String IntLiteral.prettyString() {
 		return getNUMERAL();
 	}

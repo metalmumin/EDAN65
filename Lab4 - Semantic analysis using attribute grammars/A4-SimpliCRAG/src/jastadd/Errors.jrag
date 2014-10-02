@@ -23,6 +23,8 @@ aspect Errors {
 		return new ErrorMessage(message, getLine(getStart()));
 	}
 
+	// Another example
+	// BY using a [new Counter()] class we can similarily keep track of number of declarations of a type or class
 	coll Set<ErrorMessage> Program.errors() [new TreeSet<ErrorMessage>()] with add root Program;
 
 	inh Program ASTNode.program();
@@ -30,16 +32,35 @@ aspect Errors {
 }
 
 
+
 aspect ErrorContributions {
+	// contributes the following error when the decl isUnknown 
 	IdUseExpr contributes error("symbol '" + getID() + "' is not declared")
-		//when decl().isUnknown()
-		to Program.errors() for program();
+		when decl().isUnknown()
+		to Program.errors() for program(); // restricted to children of program
 
 	IdDecl contributes error("symbol '" + getID() + "' is already declared!")
-		//when isMultiplyDeclared()
+		when isMultiplyDeclared()
 		to Program.errors() for program();
-
+				
 	IdUseExpr contributes error("the definition of symbol '" + getID() + "' is circular")
-		//when isCircular()
+		when isCircular()
 		to Program.errors() for program();
+				
+	FuncIdDecl contributes error("function '" + getID() + "' is already declared!")
+		when isMultiplyDeclared()
+		to Program.errors() for program();
+	
+	FuncUseExpr contributes error("function '" + getIdUseExpr().getID() + "' is not declared")
+		when decl().isUnknown()
+		to Program.errors() for program(); // restricted to children of program
+
+	AssignStmt contributes error("Assignment to '" + getIdUseExpr().type().type() + " " + getIdUseExpr().getID() + "' is incompatible with type '" + getExpr().type().type() + "'")
+		when !compatibleTypes()
+		to Program.errors() for program(); // restricted to children of program
+
+	DeclAssignStmt contributes error("Assignment to '" + getIdDecl().type().type() + " " + getIdDecl().getID() + "' is incompatible with type '" + getExpr().type().type() + "'")
+		when !compatibleTypes()
+		to Program.errors() for program(); // restricted to children of program
+
 }
