@@ -209,11 +209,23 @@ aspect NameAnalysis {
 	
 	syn boolean DeclAssignStmt.compatibleTypes() {
 	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdDecl().type().getType() + "' and '" + getExpr().type().getType() + "'");
-	return	getIdDecl().type().isUnknownType() 	||
+	return	getIdDecl().type().isUnknownType() 		||
 			getExpr().type().isUnknownType()		||
 			getIdDecl().type().getType().equals(getExpr().type().getType());
 	
 	}
+	
+	syn boolean WhileStmt.compatibleTypes() {
+		System.out.println("DEBUG: WhileStmt evaluating types '" + getExpr().type().getType() + "'");
+		return	getExpr().type().isUnknownType()	||
+				getExpr().type().getType().equals( (new BoolType().getType()) );
+	}
+	
+	syn boolean IfStmt.compatibleTypes() {
+		System.out.println("DEBUG: IfStmt evaluating types '" + getExpr().type().getType() + "'");
+		return	getExpr().type().isUnknownType() 	||
+				getExpr().type().getType().equals( (new BoolType().getType()) );
+		}
 	
 	syn boolean FuncUseExpr.compatibleFunctionArgumentNumber() {
 		FuncDecl f = (FuncDecl) decl().getParent();

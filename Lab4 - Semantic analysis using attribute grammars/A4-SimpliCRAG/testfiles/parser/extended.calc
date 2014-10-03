@@ -1,3 +1,4 @@
 int gcd2(int a, int b) {
 	int b = read(gcd2(1,2));
+	
 }
