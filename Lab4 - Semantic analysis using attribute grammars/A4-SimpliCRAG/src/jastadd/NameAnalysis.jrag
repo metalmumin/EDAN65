@@ -154,17 +154,14 @@ aspect NameAnalysis {
 	
 /**
  * TYPE CHECK
- * IdUse -> (lookup) -> IdDecl -> Type
+ * IdUse -> (decl() = lookup()) -> IdDecl -> inh typeLookup() -> Type
  */
 	eq Program.getChild().typeLookup() = unknownType();
 	
 	/**
 	 * Helper functions
 	 */
-	syn String Type.type() = unknownType().getType();
-	syn String IntType.type() = getINT();
-	syn String BoolType.type() = getBOOL();
-	
+
 	/**
 	 * Abstract Expr
 	 */
@@ -176,17 +173,23 @@ aspect NameAnalysis {
 	syn Type Expr.type() {
 		System.out.println("DEBUG: Expr debug");
 		return unknownType();
-		} 
-
+	}
 	
-//	syn Type IntLiteral.type() = new IntType();
-//	syn Type BoolLiteral.type() = new BoolType();
+	syn boolean Expr.isVariable() = true;
+	
+	syn boolean IntLiteral.isVariable() = false;
+	syn boolean BoolLiteral.isVariable() = true;
+	syn Type IntLiteral.type() = new IntType();
+	syn Type BoolLiteral.type() = new BoolType();
+	
 	inh Type Param.typeLookup();
 	eq Param.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
 	inh Type DeclAssignStmt.typeLookup();
 	eq DeclAssignStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
 	inh Type DeclStmt.typeLookup();
 	eq DeclStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
+	inh Type FuncDecl.typeLookup();
+	eq FuncDecl.getName().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
 	
 	inh Type IdDecl.typeLookup();
 	syn Type IdDecl.type() = typeLookup();
@@ -197,19 +200,38 @@ aspect NameAnalysis {
 	syn Type FuncUseExpr.type() = decl().type();
 	
 	syn boolean AssignStmt.compatibleTypes() {
-	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdUseExpr().type().type() + "' and '" + getExpr().type().type() + "'");
+	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdUseExpr().type().getType() + "' and '" + getExpr().type().getType() + "'");
 	return	getIdUseExpr().type().isUnknownType() 	||
 			getExpr().type().isUnknownType()		||
-			getIdUseExpr().type().type().equals(getExpr().type().type());
+			getIdUseExpr().type().getType().equals(getExpr().type().getType());
 	
 	}
 	
 	syn boolean DeclAssignStmt.compatibleTypes() {
-	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdDecl().type().type() + "' and '" + getExpr().type().type() + "'");
+	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdDecl().type().getType() + "' and '" + getExpr().type().getType() + "'");
 	return	getIdDecl().type().isUnknownType() 	||
 			getExpr().type().isUnknownType()		||
-			getIdDecl().type().type().equals(getExpr().type().type());
+			getIdDecl().type().getType().equals(getExpr().type().getType());
 	
+	}
+	
+	syn boolean FuncUseExpr.compatibleFunctionArgumentNumber() {
+		FuncDecl f = (FuncDecl) decl().getParent();
+		int params = f.getNumParam();
+		int exprs = getNumExpr();
+		boolean result = (params == exprs);
+		return result;
+	}
+	
+	syn boolean FuncUseExpr.compatibleArgumentType() {
+		boolean result = compatibleFunctionArgumentNumber();
+		if(!result)	return true;
+		FuncDecl f = (FuncDecl) decl().getParent();
+		int params = f.getNumParam();
+		
+		for(int i = 0; i < params; i++) 
+			result &= f.getParam(i).getType().getType().equals( getExpr(i).type().getType());
+		return result;
 	}
 }
 

@@ -55,12 +55,20 @@ aspect ErrorContributions {
 		when decl().isUnknown()
 		to Program.errors() for program(); // restricted to children of program
 
-	AssignStmt contributes error("Assignment to '" + getIdUseExpr().type().type() + " " + getIdUseExpr().getID() + "' is incompatible with type '" + getExpr().type().type() + "'")
+	AssignStmt contributes error("Assignment to '" + getIdUseExpr().type().getType() + " " + getIdUseExpr().getID() + "' is incompatible with type '" + getExpr().type().getType() + "'")
 		when !compatibleTypes()
 		to Program.errors() for program(); // restricted to children of program
 
-	DeclAssignStmt contributes error("Assignment to '" + getIdDecl().type().type() + " " + getIdDecl().getID() + "' is incompatible with type '" + getExpr().type().type() + "'")
+	DeclAssignStmt contributes error("Assignment to '" + getIdDecl().type().getType() + " " + getIdDecl().getID() + "' is incompatible with type '" + getExpr().type().getType() + "'")
 		when !compatibleTypes()
 		to Program.errors() for program(); // restricted to children of program
-
+	
+	FuncUseExpr contributes error("ERROR: incompatibleFunctionArgumentNumber")
+		when !compatibleFunctionArgumentNumber()
+		to Program.errors() for program(); // restricted to children of program
+	
+	FuncUseExpr contributes error("ERROR: incompatibleArgumentType")
+		when !compatibleArgumentType()
+		to Program.errors() for program(); // restricted to children of program
+		
 }
