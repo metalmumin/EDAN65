@@ -150,8 +150,8 @@ integer_literal = NUMERAL.num						{: return new IntLiteral(num);	:};
 bool_literal = BOOLEAN.b							{: return new BoolLiteral(b);   :};
 		
 id_use		= ID.id									{: return new IdUseExpr(id);	:};
-func_use	= id_use.a LP func_expr_list.b RP		{: return new FuncUseExpr(a, b);:}
-			| id_use.a LP RP						{: return new FuncUseExpr(a, new List());:}
+func_use	= ID.a LP func_expr_list.b RP		{: return new FuncUseExpr(a, b);:}
+			| ID.a LP RP						{: return new FuncUseExpr(a, new List());:}
 			;
 			
 func_read	= READ LP RP							{: return new ReadFunc(new Opt());		:}

@@ -3,41 +3,31 @@ import java.util.HashSet;
 
 aspect NameAnalysis {
 /**
- * Lookup-pattern: IdDecl
+ * Variable lookup-pattern: IdDecl
  */
 	eq Program.getChild().lookup(String name) = unknownDecl();
 	
     /**
 	 * IdUseExpr: Start lookup-pattern
 	 */
-	syn IdDecl IdUseExpr.decl() {
-		if(this.getParent() instanceof FuncUseExpr) {
-			return new IdDecl(); // "ignore" FuncUseExpr node  	
-		} else {
-			return lookup(getID());	
-		}
-	}
+	syn IdDecl IdUseExpr.decl() = lookup(getID());
 	inh IdDecl IdUseExpr.lookup(String name);
 	
 	/**
 	 * IdDecl: Start isMultiplyDeclared lookup-pattern
 	 */
 	inh IdDecl IdDecl.lookup(String name);
-	syn boolean IdDecl.isMultiplyDeclared() {
-		System.out.println("DEBUG: isMultiplyDeclared is checking if '" + getID() + "' is multiply declared.");
-		return lookup(getID()) != this;
-	}
-	
+	syn boolean IdDecl.isMultiplyDeclared() = lookup(getID()) != this;
 	
 	/**
 	 * Abstract Stmt
 	 */
-	inh IdDecl Stmt.lookup(String name); // ask parent
-	eq  Stmt.getChild().lookup(String name) { // do a custom - node-specific lookup for all children
+	inh IdDecl Stmt.lookup(String name);
+	eq  Stmt.getChild().lookup(String name) {
 		IdDecl decl = localLookup(name);
 		return !decl.isUnknown() ? decl : lookup(name);
 	}
-	syn IdDecl Stmt.localLookup(String name) { return unknownDecl(); } // because by default a *Stmt has no Decls - return unknownDecl()
+	syn IdDecl Stmt.localLookup(String name) = unknownDecl();
 
 	/**
 	 * Block : Stmt
@@ -84,22 +74,19 @@ aspect NameAnalysis {
 		
 		return unknownDecl();
 	}
-/**
- * End Stmt.
- */
-	
+
 	/**
 	 * FuncDecl : Func
+	 * Find function parameter declarations
 	 */
 	inh IdDecl FuncDecl.lookup(String name);
-	eq FuncDecl.getChild().lookup(String name) { // makes an "arc" to both Block and List<Param> nodes 
+	eq FuncDecl.getChild().lookup(String name) { 
 		IdDecl decl = localLookup(name);
 		return !decl.isUnknown() ? decl : lookup(name);
 	}
 	syn IdDecl FuncDecl.localLookup(String name) {
 		for (Param par : getParams()) {
 			if (par.getIdDecl().getID().equals(name)) {
-				System.out.println("DEBUG: FuncDecl looking for '" + name + "'. Found: '" + par.getIdDecl().getID() + "'");
 				return par.getIdDecl();
 			}
 		}
@@ -107,16 +94,30 @@ aspect NameAnalysis {
 	}
 	
 /**
- * Find FuncDecl
+ * Function lookup-pattern: FuncDecl
  */
+
 	/**
-	 * FuncIdDecl	::= <ID>;
+	 * Start lookup pattern isMultiplyDeclared - (foreach)
+	 */
+	inh FuncIdDecl FuncIdDecl.func(String name);
+	syn boolean FuncIdDecl.isMultiplyDeclared() = func(getID()) != this;
+	
+	/**
+	 * Start lookup pattern FuncUseExpr - for(index-1)
+	 */
+	inh FuncIdDecl FuncUseExpr.func(String name);
+	syn FuncIdDecl FuncUseExpr.decl() = func(getID());
+	
+	/**
+	 * abstract Func
 	 */
 	inh FuncIdDecl Func.func(String name);
-	syn FuncIdDecl Func.localFunc(String name) {
-		return unknownFunc();
-	}
+	syn FuncIdDecl Func.localFunc(String name) = unknownFunc();
 	
+	/**
+	 * FuncDecl : Func
+	 */
 	syn FuncIdDecl FuncDecl.localFunc(String name) {
 		FuncIdDecl decl = getName();
 		return !decl.isUnknown() ? decl : func(name);
@@ -132,118 +133,11 @@ aspect NameAnalysis {
 	syn FuncIdDecl Program.localFunc(String name, int until) {
 		for (int i = 0; i <= until; i++) {
 			FuncIdDecl decl = getFunc(i).localFunc(name);
-			System.out.println("DEBUG: Program looking for function '" + name + "'. Found: '" + decl.getID() + "'");
 			if (decl.getID().equals(name)) {
 				return decl;
 			}
 		}
 		return unknownFunc();
-	}
-
-	/**
-	 * Start lookup pattern isMultiplyDeclared - (foreach)
-	 */
-	inh FuncIdDecl FuncIdDecl.func(String name);
-	syn boolean FuncIdDecl.isMultiplyDeclared() = func(getID()) != this;
-	
-	/**
-	 * Start lookup pattern FuncUseExpr - for(index-1)
-	 */
-	inh FuncIdDecl FuncUseExpr.func(String name);
-	syn FuncIdDecl FuncUseExpr.decl() = func(getIdUseExpr().getID());
-	
-/**
- * TYPE CHECK
- * IdUse -> (decl() = lookup()) -> IdDecl -> inh typeLookup() -> Type
- */
-	eq Program.getChild().typeLookup() = unknownType();
-	
-	/**
-	 * Helper functions
-	 */
-
-	/**
-	 * Abstract Expr
-	 */
-	inh Type Expr.typeLookup();	// ask parent
-	eq  Expr.getChild().typeLookup() { 	// do a custom - node-specific lookup for all children
-		Type t = type();
-		return !t.isUnknownType() ? t : typeLookup();
-	}
-	syn Type Expr.type() {
-		System.out.println("DEBUG: Expr debug");
-		return unknownType();
-	}
-	
-	syn boolean Expr.isVariable() = true;
-	
-	syn boolean IntLiteral.isVariable() = false;
-	syn boolean BoolLiteral.isVariable() = true;
-	syn Type IntLiteral.type() = new IntType();
-	syn Type BoolLiteral.type() = new BoolType();
-	
-	inh Type Param.typeLookup();
-	eq Param.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
-	inh Type DeclAssignStmt.typeLookup();
-	eq DeclAssignStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
-	inh Type DeclStmt.typeLookup();
-	eq DeclStmt.getIdDecl().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
-	inh Type FuncDecl.typeLookup();
-	eq FuncDecl.getName().typeLookup() = !getType().isUnknownType() ? getType() : typeLookup();
-	
-	inh Type IdDecl.typeLookup();
-	syn Type IdDecl.type() = typeLookup();
-	inh Type FuncIdDecl.typeLookup();
-	syn Type FuncIdDecl.type() = typeLookup();
-	
-	syn Type IdUseExpr.type() = decl().type();
-	syn Type FuncUseExpr.type() = decl().type();
-	
-	syn boolean AssignStmt.compatibleTypes() {
-	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdUseExpr().type().getType() + "' and '" + getExpr().type().getType() + "'");
-	return	getIdUseExpr().type().isUnknownType() 	||
-			getExpr().type().isUnknownType()		||
-			getIdUseExpr().type().getType().equals(getExpr().type().getType());
-	
-	}
-	
-	syn boolean DeclAssignStmt.compatibleTypes() {
-	System.out.println("DEBUG: AssignStmt evaluating types '" + getIdDecl().type().getType() + "' and '" + getExpr().type().getType() + "'");
-	return	getIdDecl().type().isUnknownType() 		||
-			getExpr().type().isUnknownType()		||
-			getIdDecl().type().getType().equals(getExpr().type().getType());
-	
-	}
-	
-	syn boolean WhileStmt.compatibleTypes() {
-		System.out.println("DEBUG: WhileStmt evaluating types '" + getExpr().type().getType() + "'");
-		return	getExpr().type().isUnknownType()	||
-				getExpr().type().getType().equals( (new BoolType().getType()) );
-	}
-	
-	syn boolean IfStmt.compatibleTypes() {
-		System.out.println("DEBUG: IfStmt evaluating types '" + getExpr().type().getType() + "'");
-		return	getExpr().type().isUnknownType() 	||
-				getExpr().type().getType().equals( (new BoolType().getType()) );
-		}
-	
-	syn boolean FuncUseExpr.compatibleFunctionArgumentNumber() {
-		FuncDecl f = (FuncDecl) decl().getParent();
-		int params = f.getNumParam();
-		int exprs = getNumExpr();
-		boolean result = (params == exprs);
-		return result;
-	}
-	
-	syn boolean FuncUseExpr.compatibleArgumentType() {
-		boolean result = compatibleFunctionArgumentNumber();
-		if(!result)	return true;
-		FuncDecl f = (FuncDecl) decl().getParent();
-		int params = f.getNumParam();
-		
-		for(int i = 0; i < params; i++) 
-			result &= f.getParam(i).getType().getType().equals( getExpr(i).type().getType());
-		return result;
 	}
 }
 

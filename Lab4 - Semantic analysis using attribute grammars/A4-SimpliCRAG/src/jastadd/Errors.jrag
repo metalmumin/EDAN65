@@ -51,7 +51,7 @@ aspect ErrorContributions {
 		when isMultiplyDeclared()
 		to Program.errors() for program();
 	
-	FuncUseExpr contributes error("function '" + getIdUseExpr().getID() + "' is not declared")
+	FuncUseExpr contributes error("function '" + getID() + "' is not declared")
 		when decl().isUnknown()
 		to Program.errors() for program(); // restricted to children of program
 
@@ -63,11 +63,11 @@ aspect ErrorContributions {
 		when !compatibleTypes()
 		to Program.errors() for program(); // restricted to children of program
 	
-	FuncUseExpr contributes error("ERROR: incompatibleFunctionArgumentNumber")
+	FuncUseExpr contributes error("ERROR: incompatibleFunctionArgumentNumber in usage of function '" + prettyString() + "'")
 		when !compatibleFunctionArgumentNumber()
 		to Program.errors() for program(); // restricted to children of program
 	
-	FuncUseExpr contributes error("ERROR: incompatibleArgumentType")
+	FuncUseExpr contributes error("ERROR: incompatibleArgumentType in usage of function '" + prettyString() + "'")
 		when !compatibleArgumentType()
 		to Program.errors() for program(); // restricted to children of program
 		

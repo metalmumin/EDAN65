@@ -33,7 +33,7 @@ IntLiteral : Literal ::= <NUMERAL>;
 BoolLiteral : Literal ::= <BOOLEAN>;
 
 IdUseExpr 	: PrimaryExpr ::= <ID>;
-FuncUseExpr : PrimaryExpr ::= IdUseExpr Expr*;
+FuncUseExpr : PrimaryExpr ::= <ID> Expr*;
 ReadFunc    : PrimaryExpr ::= [Default:Expr];
 
 Add : AddExpr;

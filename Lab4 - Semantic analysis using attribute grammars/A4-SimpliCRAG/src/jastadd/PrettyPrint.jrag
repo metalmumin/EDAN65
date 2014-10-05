@@ -171,7 +171,7 @@ aspect PrettyPrint {
 	
 	public String FuncUseExpr.prettyString() {
 		String s = "";
-		s += getIdUseExpr().prettyString() +"(";
+		s += getID() +"(";
 		for(int i = 0; i < getNumExpr(); ++i) {			
 			s += getExpr(i).prettyString();
 			if(i < getNumExpr() - 1) {
