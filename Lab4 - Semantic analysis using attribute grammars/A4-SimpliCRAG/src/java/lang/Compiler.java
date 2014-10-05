@@ -33,10 +33,7 @@ public class Compiler {
 			LangParser parser = new LangParser();
 			Program program = (Program) parser.parse(scanner);
 			program.prettyPrint(System.out);
-			//program.checkNames(System.out);
-            //System.out.println("Found interactive statement(s): " + CheckInteractiveVisitor.result(program));
-            System.out.println(program.dumpTree());
-            
+            System.out.println("\n" + program.dumpTree());
             if (!program.errors().isEmpty()) {
 				System.err.println();
 				System.err.println("Errors: ");
