@@ -1,0 +1,9 @@
+int main(){
+	if(1) {
+		int a = 4;
+	}
+	a = 3;
+	return a;
+}
+
+/* a är inte deklarerat i korrekt scope */

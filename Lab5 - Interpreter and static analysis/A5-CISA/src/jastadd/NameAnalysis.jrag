@@ -1,0 +1,151 @@
+import java.util.Set;
+import java.util.HashSet;
+
+aspect NameAnalysis {
+/**
+ * Variable lookup-pattern: IdDecl
+ */
+	eq Program.getChild().lookup(String name) = unknownDecl();
+	
+    /**
+	 * IdUseExpr: Start lookup-pattern
+	 */
+	syn IdDecl IdUseExpr.decl() = lookup(getID());
+	inh IdDecl IdUseExpr.lookup(String name);
+	
+	/**
+	 * IdDecl: Start isMultiplyDeclared lookup-pattern
+	 */
+	inh IdDecl IdDecl.lookup(String name);
+	syn boolean IdDecl.isMultiplyDeclared()	{
+		IdDecl decl = lookup(getID());
+		if(decl.isUnknown()) {
+			return false;
+		}
+		return decl != this;
+	}
+	
+	/**
+	 * Block : Stmt
+	 * Lookup List<Stmt>. No? Ask parent.	
+	 */
+	inh IdDecl Block.lookup(String name);
+	eq  Block.getStmt(int index).lookup(String name) {
+		IdDecl decl = localLookup(name, index-1);
+//		return !decl.isUnknown() ? lastLookup(name, index) : lookup(name);
+//		return !decl.isUnknown() ? decl : lastLookup(name, index);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	
+	syn IdDecl Block.localLookup(String name, int until) {
+		for (int i = 0; i <= until; i++) {
+			IdDecl decl = getStmt(i).localLookup(name);
+			if (decl.getID().equals(name))
+				return decl;
+		}
+		return unknownDecl();
+	}
+//	syn IdDecl Block.lastLookup(String name, int until) {
+//		IdDecl decl = getStmt(until).localLookup(name);
+//		IdDecl decl_last = lookup(name);
+//		if (decl.getID().equals(name) && decl_last.isUnknown())
+//				return decl;
+//		return lookup(name);
+//	}
+	
+	/**
+	 * Abstract Stmt
+	 */
+	inh IdDecl Stmt.lookup(String name);
+//	eq	Stmt.getChild().lookup(String name) = localLookup(name);
+	syn IdDecl Stmt.localLookup(String name) = unknownDecl();
+
+	/**
+	 * DeclStmt : Stmt
+	 */
+//	eq DeclStmt.getIdDecl().lookup(String name) = getIdDecl().getID().equals(name) ? getIdDecl() : unknownDecl(); 
+	syn IdDecl DeclStmt.localLookup(String name) = !getIdDecl().isUnknown() ? getIdDecl() : lookup(name);
+	/**
+	 * DeclAssignStmt : Stmt
+	 */
+	syn IdDecl DeclAssignStmt.localLookup(String name) = !getIdDecl().isUnknown() ? getIdDecl() : lookup(name);	
+	
+	/**
+	 * FuncDecl : Func
+	 * Find function parameter declarations
+	 */
+	inh IdDecl FuncDecl.lookup(String name);
+	eq FuncDecl.getBlock().lookup(String name) {
+		IdDecl decl = localLookup(name);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	eq FuncDecl.getParam().lookup(String name) {
+		IdDecl decl = localLookup(name);
+		return !decl.isUnknown() ? decl : lookup(name);
+	}
+	syn IdDecl FuncDecl.localLookup(String name) {
+		for (Param par : getParams()) {
+			if (par.getIdDecl().getID().equals(name)) {
+				return par.getIdDecl();
+			}
+		}
+		return unknownDecl();
+	}
+	
+/**
+ * Function lookup-pattern: FuncDecl
+ */
+
+	/**
+	 * Start lookup pattern isMultiplyDeclared - (foreach)
+	 */
+	inh FuncIdDecl FuncIdDecl.func(String name);
+	syn boolean FuncIdDecl.isMultiplyDeclared() = func(getID()) != this;
+	
+	/**
+	 * Start lookup pattern FuncUseExpr - for(index-1)
+	 */
+	inh FuncIdDecl FuncUseExpr.func(String name);
+	syn FuncIdDecl FuncUseExpr.decl() = func(getID());
+	
+	/**
+	 * abstract Func
+	 */
+	inh FuncIdDecl Func.func(String name);
+	syn FuncIdDecl Func.localFunc(String name) = unknownFunc();
+	
+	/**
+	 * FuncDecl : Func
+	 */
+	syn FuncIdDecl FuncDecl.localFunc(String name) {
+		FuncIdDecl decl = getName();
+		return !decl.isUnknown() ? decl : func(name);
+	}
+	
+	/**
+	 * FuncUseExpr : PrimaryExpr
+	 */
+	eq Program.getFunc(int index).func(String name) {
+		FuncIdDecl decl = localFunc(name, index);
+		return !decl.isUnknown() ? decl : unknownFunc();
+	}
+	syn FuncIdDecl Program.localFunc(String name, int until) {
+		for (int i = 0; i <= until; i++) {
+			FuncIdDecl decl = getFunc(i).localFunc(name);
+			if (decl.getID().equals(name)) {
+				return decl;
+			}
+		}
+		return unknownFunc();
+	}
+}
+
+aspect CircularDefinitions {
+	/* Identify circular definitions in DeclAssignStmt statements */
+	syn boolean IdUseExpr.isCircular() = inExprOf(decl());
+	inh boolean IdUseExpr.inExprOf(IdDecl decl);
+	inh boolean Stmt.inExprOf(IdDecl decl);
+	eq DeclAssignStmt.getExpr().inExprOf(IdDecl decl)
+		= getIdDecl() == decl || inExprOf(decl);
+	eq Program.getChild().inExprOf(IdDecl decl) = false;
+}

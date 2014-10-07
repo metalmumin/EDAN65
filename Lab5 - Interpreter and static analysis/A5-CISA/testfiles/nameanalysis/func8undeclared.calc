@@ -1,0 +1,6 @@
+int main(){
+	a = 3;
+	return a;
+}
+
+/* a är inte deklarerat */

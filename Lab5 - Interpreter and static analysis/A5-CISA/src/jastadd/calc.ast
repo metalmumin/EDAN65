@@ -1,0 +1,57 @@
+Program ::= Func*;
+
+abstract Func;
+
+abstract Type;
+IntType 	: Type ::= <INT>;
+BoolType 	: Type ::= <BOOL>;
+UnknownType : Type ::= <ID>;
+
+FuncDecl : Func ::= Type Name:FuncIdDecl Param* Block;
+
+abstract Stmt;
+Param : Stmt ::= Type IdDecl;
+Block : Stmt ::= Stmt*;
+
+WhileStmt : Stmt ::= Expr Block;
+IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
+ReturnStmt: Stmt ::= Expr;
+AssignStmt: Stmt ::= IdUseExpr Expr;
+DeclStmt  : Stmt ::= Type IdDecl;
+PrintStmt : Stmt ::= Expr;
+DeclAssignStmt : Stmt ::= Type IdDecl Expr;
+
+abstract Expr;
+abstract BinExpr	: Expr ::= Left:Expr Right:Expr;
+abstract UnaryExpr	: Expr;
+abstract PrimaryExpr: UnaryExpr; 
+abstract Literal	: PrimaryExpr;
+abstract AddExpr	: BinExpr;
+abstract MulExpr	: BinExpr;
+
+IntLiteral : Literal ::= <NUMERAL>;
+BoolLiteral : Literal ::= <BOOLEAN>;
+
+IdUseExpr 	: PrimaryExpr ::= <ID>;
+FuncUseExpr : PrimaryExpr ::= <ID> Expr*;
+ReadFunc    : PrimaryExpr ::= [Default:Expr];
+
+Add : AddExpr;
+Sub : AddExpr;
+Mul : MulExpr;
+Div : MulExpr;
+Mod : MulExpr;
+GT  : BinExpr;
+LT  : BinExpr;
+GE  : BinExpr;
+LE  : BinExpr;
+EQ  : BinExpr;
+NE  : BinExpr;
+
+IdDecl	::= <ID>;
+UnknownDecl : IdDecl;
+
+FuncIdDecl	::= <ID>;
+UnknownFunc : FuncIdDecl;
+
+ 

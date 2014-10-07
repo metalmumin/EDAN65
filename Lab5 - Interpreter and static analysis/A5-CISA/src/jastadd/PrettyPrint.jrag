@@ -1,0 +1,206 @@
+import java.io.PrintStream;
+
+aspect PrettyPrint {
+	
+	public void Program.prettyPrint(PrintStream out) {
+		out.print ("");
+		String ind = "";
+		
+		if(hasFunc()) {
+			for(int i = 0; i < getNumFunc(); ++i) {
+				getFunc(i).prettyPrint(out,ind);
+			}
+		}
+	}
+
+	public void ASTNode.prettyPrint(PrintStream out, String ind) {
+		for (int i = 0; i < getNumChild(); ++i) {
+			getChild(i).prettyPrint(out, ind);
+		}
+	}
+	
+	/* PrettyError */
+	private String FuncUseExpr.prettyError;
+	
+	public abstract String Type.getType();
+	public abstract String BinExpr.getOperator();
+	public abstract String Expr.prettyString();
+	public String BinExpr.prettyString() {
+		return getLeft().prettyString() +  getOperator() + getRight().prettyString();
+	}
+	
+	public void FuncDecl.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + prettyString()); 	// TODO: We only have one type
+//		for (int i = 0; i < getNumParam(); ++i) {
+//			out.print(getParamList().getChild(i).prettyString());		
+//			// When last element - append no comma
+//			if(i < getNumParam() - 1) {
+//				out.print(", ");
+//			}
+//		}
+//		out.print(")");
+		getBlock().prettyPrint(out, ind);
+		out.print("\n");
+	}
+	
+	public String FuncDecl.prettyString() {
+		String tmp = new String("");
+		tmp += getType().getType() + " " + getName().prettyString() + "(";
+		for (int i = 0; i < getNumParam(); ++i) {
+			tmp += getParamList().getChild(i).prettyString();		
+			// When last element - append no comma
+			if(i < getNumParam() - 1) {
+				tmp += ", ";
+			}
+		}
+		tmp += ")";
+		return tmp;
+	}
+	
+	public String Param.prettyString() {
+		return getType().getType() + " " + getIdDecl().prettyString();
+	}
+	
+	/**
+	 * Handles ";\n" after each Stmt
+	 * Knows when to increase indentation
+	 */
+	public void Block.prettyPrint(PrintStream out, String ind) {
+		out.print(" {");
+		String tmp = new String(ind);
+		ind += " ";
+		for (int i = 0; i < getNumChild(); ++i) {
+			out.print(ind);
+			getChild(i).prettyPrint(out, ind);
+		}
+		out.print("\n" + tmp +"}");
+	}
+	
+	public void WhileStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + "while(" + getExpr().prettyString());
+		getBlock().prettyPrint(out, ind);	
+	}
+	
+	public void IfStmt.prettyPrint(PrintStream out, String ind) {
+		if(!hasElse()) {
+			out.print("\n" + ind + "if(" + getExpr().prettyString() + ")");
+			getThen().prettyPrint(out, ind);
+		} else {
+			out.print("\n" + ind + "if(" + getExpr().prettyString() + ")");
+			getThen().prettyPrint(out, ind);
+			out.print(" else");
+			getElse().prettyPrint(out, ind);
+		}
+	}
+	
+	public void ReturnStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + "return " + getExpr().prettyString() + ";");
+	}
+	
+	public void AssignStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + getIdUseExpr().prettyString()  + " = " + getExpr().prettyString() + ";");
+	}
+	
+	public void DeclStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + "int " + getIdDecl().prettyString() + ";");
+	}
+	
+	public void PrintStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + "print(" + getExpr().prettyString() + ");");
+	}
+	
+	public void DeclAssignStmt.prettyPrint(PrintStream out, String ind) {
+		out.print("\n" + ind + "int " + getIdDecl().prettyString() + " = " + getExpr().prettyString() + ";");
+	}
+	
+	public String IntType.getType() {
+		return ("int");
+	}
+	
+	public String BoolType.getType() {
+		return ("bool");
+	}
+	
+	public String UnknownType.getType() {
+		return ("");
+	}
+	
+	public String Add.getOperator() {
+		return (" + ");
+	}
+	
+	public String Sub.getOperator() {
+		return (" - ");
+	}
+	
+	public String Mul.getOperator() {
+		return (" * ");
+	}
+
+	public String Div.getOperator() {
+		return (" / ");
+	}
+
+	public String Mod.getOperator() {
+		return (" % ");
+	}
+	public String GT.getOperator() {
+		return (" > ");
+	}
+	
+	public String LT.getOperator() {
+		return (" < ");
+		
+	}	
+	public String GE.getOperator() {
+		return (" >= ");
+	}
+	public String LE.getOperator() {
+		return (" <= ");
+	}
+	
+	public String EQ.getOperator() {
+		return (" == ");
+	}
+	
+	public String NE.getOperator() {
+		return (" != ");
+	}
+	
+	public String IdUseExpr.prettyString() {
+		return getID();
+	}
+
+	public String IdDecl.prettyString() {
+		return getID();
+	}
+	
+	public String FuncIdDecl.prettyString() {
+		return getID();
+	}
+	
+	public String IntLiteral.prettyString() {
+		return getNUMERAL();
+	}
+	
+	public String BoolLiteral.prettyString() {
+		return getBOOLEAN();
+	}
+	
+	public String FuncUseExpr.prettyString() {
+		String s = "";
+		s += getID() +"(";
+		for(int i = 0; i < getNumExpr(); ++i) {			
+			s += getExpr(i).prettyString();
+			if(i < getNumExpr() - 1) {
+				s += ",";
+			}
+		}
+		s += ")";
+		return s;
+	}
+	
+	public String ReadFunc.prettyString() {
+		return "read()";
+	}
+}

@@ -1,0 +1,6 @@
+int gcd2(int ds, int sb) {
+	int d;
+	int d;
+	int ds;
+	int f = gcd2(gcd2(4,3),false);
+}

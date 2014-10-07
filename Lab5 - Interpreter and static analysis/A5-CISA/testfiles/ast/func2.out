@@ -1,0 +1,20 @@
+Program
+  List
+    FuncDecl
+      IntType
+      IdDecl
+      List
+        Param
+          IntType
+          IdDecl
+        Param
+          IntType
+          IdDecl
+      Block
+        List
+    FuncDecl
+      IntType
+      IdDecl
+      List
+      Block
+        List

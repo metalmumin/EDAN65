@@ -1,0 +1,24 @@
+aspect Interpreter {
+		public class ActivationRecord {
+			public ActivationRecord() {
+				
+			}
+		}
+		public void Program.eval() {
+			
+		}
+		
+		public int FuncDecl.eval(ActivationRecord actrec) {
+			throw new RuntimeException();
+//			return 0;
+		}
+		
+		public void Stmt.eval(ActivationRecord actrec) {
+			throw new RuntimeException();
+		}
+		
+		public int Expr.eval(ActivationRecord actrec) {
+			throw new RuntimeException();
+//			return 0;
+		}
+}

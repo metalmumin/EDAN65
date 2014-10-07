@@ -1,0 +1,9 @@
+int main(int a, int b){
+	int a = 3;
+	if(a < 3) {
+		int a = 4;	/* okay: not in same block */
+	}
+	int a = 4; /* redeclaration */
+	return a;
+}
+/* int a finns som inparameter till funktion  och deklaration */

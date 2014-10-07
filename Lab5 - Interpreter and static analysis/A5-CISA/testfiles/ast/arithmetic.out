@@ -1,0 +1,21 @@
+Program
+  List
+    FuncDecl
+      IntType
+      IdDecl
+      List
+      Block
+        List
+          AssignStmt
+            IdUseExpr
+            Sub
+              Add
+                IdUseExpr
+                Mul
+                  Mul
+                    Mul
+                      IdUseExpr
+                      IntLiteral
+                    IdUseExpr
+                  IntLiteral
+              IntLiteral

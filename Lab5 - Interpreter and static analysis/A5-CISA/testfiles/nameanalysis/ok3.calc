@@ -1,0 +1,8 @@
+int let() {
+	int pi = 3;
+	return pi; /* okay: a refers to the parameter */
+}
+
+int main(int a) {
+	return let(); /* okay: a refers to the parameter */
+}

@@ -1,0 +1,81 @@
+aspect TypeAnalysis {
+/**
+ * Type Analysis
+ * IdUse -> (decl() = lookup()) -> IdDecl -> inh typeLookup() -> Type
+ */
+	eq Program.getChild().typeLookup() = unknownType();
+	eq Program.getChild().argLookup() = 0;
+	
+	syn boolean Expr.isVariable() = true;
+	syn boolean IntLiteral.isVariable() = false;
+	syn boolean BoolLiteral.isVariable() = false;
+	
+	inh Type Expr.typeLookup();
+	eq  Expr.getChild().typeLookup() {
+		Type t = type();
+		return !t.isUnknownType() ? t : typeLookup();
+	}
+	syn Type Expr.type() = unknownType();
+	
+	syn Type IntLiteral.type() = new IntType();
+	syn Type BoolLiteral.type() = new BoolType();
+	syn Type IdUseExpr.type() = decl().type();
+	syn Type FuncUseExpr.type() = decl().type();
+	
+	inh Type DeclAssignStmt.typeLookup();
+	inh Type DeclStmt.typeLookup();
+	inh Type FuncDecl.typeLookup();
+	inh Type Param.typeLookup();
+	eq DeclAssignStmt.getIdDecl().typeLookup() 	= !getType().isUnknownType() ? getType() : typeLookup();
+	eq DeclStmt.getIdDecl().typeLookup() 		= !getType().isUnknownType() ? getType() : typeLookup();
+	eq FuncDecl.getName().typeLookup() 			= !getType().isUnknownType() ? getType() : typeLookup();
+	eq Param.getIdDecl().typeLookup() 			= !getType().isUnknownType() ? getType() : typeLookup();
+	
+	inh Type IdDecl.typeLookup();
+	inh Type FuncIdDecl.typeLookup();
+	syn Type IdDecl.type() = typeLookup();
+	syn Type FuncIdDecl.type() = typeLookup();
+	
+	inh int FuncDecl.argLookup();
+	inh int FuncIdDecl.argLookup();
+	syn int FuncIdDecl.args() = argLookup();
+	syn int FuncUseExpr.args() = getNumExpr();
+	eq FuncDecl.getName().argLookup() = getNumParam();
+
+	inh FuncDecl FuncIdDecl.funcLookup();
+	syn FuncDecl FuncIdDecl.func() = funcLookup();
+	eq FuncDecl.getName().funcLookup() = this;
+	
+	syn boolean AssignStmt.compatibleTypes() = 
+			getIdUseExpr().type().isUnknownType() 	||
+			getExpr().type().isUnknownType()		||
+			getIdUseExpr().type().getType().equals(getExpr().type().getType());
+	
+	syn boolean DeclAssignStmt.compatibleTypes() =
+			getIdDecl().type().isUnknownType() 		||
+			getExpr().type().isUnknownType()		||
+			getIdDecl().type().getType().equals(getExpr().type().getType());
+	
+	syn boolean WhileStmt.compatibleTypes() =
+			getExpr().type().isUnknownType()		||
+			getExpr().type().getType().equals((new BoolType().getType()));
+	
+	syn boolean IfStmt.compatibleTypes() =
+			getExpr().type().isUnknownType()		||
+			getExpr().type().getType().equals((new BoolType().getType()));
+	
+	syn boolean FuncUseExpr.compatibleFunctionArgumentNumber() {
+		prettyError = "incompatibleFunctionArgumentNumber when calling function '" + decl().func().prettyString() + "' in '"+ prettyString() + "'";
+		return args() == decl().args();
+	}
+	
+	syn boolean FuncUseExpr.compatibleArgumentType() {
+		if(!compatibleFunctionArgumentNumber())	return true;
+		boolean result = compatibleFunctionArgumentNumber();
+		for(int i = 0; i < args(); i++) {
+			prettyError = "incompatibleArgumentType when calling function '" + decl().func().prettyString() + "' in '"+ prettyString() + "'";
+			result &= decl().func().getParam(i).getType().getType().equals( getExpr(i).type().getType());
+		}
+		return result;
+	}
+}

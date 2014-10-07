@@ -1,0 +1,17 @@
+int main(){
+	int a = 1;
+	
+	if(1) {
+		int b = 4; 
+	} else {
+		int b = 4;
+	}
+	
+	if(1) {
+		int c = a * b; /* a och b finns ej */
+	}
+	
+	return c; /* c finns ej */
+}
+
+/* c,a och b är inte deklarerade i korrekt scope */
