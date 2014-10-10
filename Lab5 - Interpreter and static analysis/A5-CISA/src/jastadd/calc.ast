@@ -19,7 +19,7 @@ AssignStmt: Stmt ::= IdUseExpr Expr;
 IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
 WhileStmt : Stmt ::= Expr Block;
 ReturnStmt: Stmt ::= Expr;
-PrintStmt : Stmt ::= Expr;
+CallStmt  : Stmt ::= FuncUseExpr;
 
 abstract Expr;
 abstract BinExpr	: Expr ::= Left:Expr Right:Expr;
@@ -34,7 +34,6 @@ BoolLiteral : Literal ::= <BOOLEAN>;
 
 IdUseExpr 	: PrimaryExpr ::= <ID>;
 FuncUseExpr : PrimaryExpr ::= <ID> Expr*;
-ReadFunc    : PrimaryExpr ::= [Default:Expr];
 
 Add : AddExpr;
 Sub : AddExpr;

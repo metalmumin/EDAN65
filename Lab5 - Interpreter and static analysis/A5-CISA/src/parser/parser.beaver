@@ -10,7 +10,7 @@
 :};
 
 %terminals WHILE, IF, ELSE, RETURN, LP, RP, LB, RB, ASSIGN, ADD, SUB, MUL,
-DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, READ, PRINT, BOOLEAN, BOOL;
+DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, BOOLEAN, BOOL;
 
 %typeof program		= "Program";
 
@@ -49,7 +49,7 @@ DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, READ, PRINT, BO
 %typeof assign 		= "AssignStmt";
 %typeof decl 		= "DeclStmt";
 %typeof decl_assign = "DeclAssignStmt";
-%typeof print		= "PrintStmt";
+%typeof call		= "CallStmt";
 
 %typeof id_use 		= "IdUseExpr";
 %typeof func_use 	= "FuncUseExpr";
@@ -57,7 +57,6 @@ DIV, MOD, GT, LT, GE, LE, EQ, NE, SEMI, COMMA, ID, NUMERAL, INT, READ, PRINT, BO
 %typeof func_id_decl = "FuncIdDecl";
 %typeof func_decl	= "FuncDecl";
 
-%typeof func_read	= "ReadFunc";
 
 %goal program;
 
@@ -102,15 +101,15 @@ opt_block =
 		|									{: return new Opt();  		:}
 		;			
 
-stmt	= while | if | return | assign | decl | print | decl_assign;
+stmt	= while | if | return | assign | decl | call | decl_assign;
 
 while 	= WHILE LP expr.a RP block.b				{: return new WhileStmt(a,b);	:};
 if		= IF LP expr.a RP block.b opt_block.c		{: return new IfStmt(a,b,c);	:};
 return 	= RETURN expr.a SEMI						{: return new ReturnStmt(a);	:};
 assign 	= id_use.a ASSIGN expr.b SEMI				{: return new AssignStmt(a,b);	:};
 decl 	= type.t id_decl.a SEMI						{: return new DeclStmt(t, a); 		:};
-print	= PRINT LP expr.a RP SEMI					{: return new PrintStmt(a);		:};
-decl_assign = type.t id_decl.a ASSIGN expr.b SEMI			{: return new DeclAssignStmt(t,a,b); :};
+call	= func_use.a SEMI							{: return new CallStmt(a);		:};
+decl_assign = type.t id_decl.a ASSIGN expr.b SEMI	{: return new DeclAssignStmt(t,a,b); :};
 			
 expr 	= 
 		add_expr
@@ -142,7 +141,6 @@ primary_expr =
 		literal
 		| id_use
 		| func_use
-		| func_read
 		;
 literal = integer_literal | bool_literal;
 
@@ -154,8 +152,4 @@ func_use	= ID.a LP func_expr_list.b RP		{: return new FuncUseExpr(a, b);:}
 			| ID.a LP RP						{: return new FuncUseExpr(a, new List());:}
 			;
 			
-func_read	= READ LP RP							{: return new ReadFunc(new Opt());		:}
-			| READ LP expr.a RP						{: return new ReadFunc(new Opt(a));		:}
-			;
-
 //numexpr = func_use | func_read | int_use | id_use;

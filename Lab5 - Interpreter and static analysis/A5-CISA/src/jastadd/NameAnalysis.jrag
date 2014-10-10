@@ -145,6 +145,13 @@ aspect NameAnalysis {
 		return !decl.isUnknown() ? decl : unknownFunc();
 	}
 	syn FuncIdDecl Program.localFunc(String name, int until) {
+		// loop nta
+		for(FuncDecl f : predefinedFunctions()) {
+			if(f.getName().getID().equals(name)) {
+				return f.getName();
+			}
+		}
+		
 		for (int i = 0; i <= until; i++) {
 			FuncIdDecl decl = getFunc(i).localFunc(name);
 			if (decl.getID().equals(name)) {

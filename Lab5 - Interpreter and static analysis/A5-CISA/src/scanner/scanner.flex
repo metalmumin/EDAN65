@@ -42,9 +42,7 @@ BOOLEAN = "true"|"false"
 // token definitions
 "return"	{ return sym(Terminals.RETURN); }
 "while"		{ return sym(Terminals.WHILE); 	}
-"print"		{ return sym(Terminals.PRINT);	}
 "else"		{ return sym(Terminals.ELSE); 	}
-"read"		{ return sym(Terminals.READ);	}
 "if"		{ return sym(Terminals.IF); 	}
 "int"		{ return sym(Terminals.INT); 	}
 "bool"		{ return sym(Terminals.BOOL); 	}

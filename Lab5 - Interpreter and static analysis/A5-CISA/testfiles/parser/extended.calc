@@ -1,13 +1,12 @@
-int fac(int n) {
-	if (n <= 1) {
-		return 1;
-	} else { 
-		return fac(n-1) * n;
-	}
-}
-int f() {
-	print(fac(5));
-}
 int main() {
-	return f();
+int i = 0;
+if (i == 0) {
+int i = 1;
+if (i == 1) {
+int i = 2;
+print(i);
+}
+print(i);
+}
+print(i);
 }

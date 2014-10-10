@@ -2,36 +2,41 @@ import java.util.Set;
 import java.util.HashSet;
 
 aspect IdUses {
-	coll HashSet<IdUseExpr> IdDecl.uses() [new HashSet<IdUseExpr>()] with add;	
-		IdUseExpr contributes this
-		to IdDecl.uses()	
-		for decl();
-				
+	//	coll HashSet<IdUseExpr> IdDecl.uses() [new HashSet<IdUseExpr>()] with add;	
+	//		IdUseExpr contributes this
+	//		to IdDecl.uses()	
+	//		for decl();
+
 	// FuncIdDecl får ett element när FuncUseExpr får en decl()
-	coll HashSet<FuncUseExpr> FuncIdDecl.uses() [new HashSet<FuncUseExpr>()] with add;	
-		FuncUseExpr contributes this
-		to FuncIdDecl.uses()	
-		for decl();
-			
+
+	public class State {
+
+	}
+
+	syn	Set<FuncDecl> FuncDecl.reachable() circular [new HashSet<FuncDecl>()] {	
+		HashSet<FuncDecl> result = new HashSet<FuncDecl>();
+		for	(FuncDecl f : functionCalls())	{
+			result.add(f);	
+			result.addAll(f.reachable());	
+		}
+		return result;	
+	}		
+
+	coll HashSet<FuncDecl> FuncDecl.functionCalls() [new HashSet<FuncDecl>()] with add;	
+		FuncUseExpr contributes decl().func()
+		to FuncDecl.functionCalls()	
+		for enclosingFunction();
+
+			// FuncDecl får FuncUse element som finns i Blocket
+	eq FuncDecl.getBlock().encloseLookup() = this;
+
+	inh FuncDecl FuncUseExpr.encloseLookup();
+	syn FuncDecl FuncUseExpr.enclosingFunction() = encloseLookup();
+
+
 
 	eq  FuncDecl.getName().funcLookup() = this;
 	inh FuncDecl FuncIdDecl.funcLookup();
 	syn FuncDecl FuncIdDecl.func() = funcLookup();
 
-	//			  
-//	eq FuncDecl.checkReturn(boolean ret) = ret;
-//	syn boolean FuncDecl.localReturn() {
-//		for(int i = 0; i <= until; i++) {
-//			if(getBlock().localReturn())
-//				return true;
-//		}
-//		return false;
-//	}
-////	inh Stmt.checkReturn(boolean ret)
-////	syn boolean Stmt.localReturn() = false;
-////	syn boolean ReturnStmt.func() = checkReturn(true);
-//	
-//	inh FuncDecl FuncIdDecl.funcLookup();
-//	syn FuncDecl FuncIdDecl.func() = funcLookup();
-//	eq  FuncDecl.getName().funcLookup() = this;
 }

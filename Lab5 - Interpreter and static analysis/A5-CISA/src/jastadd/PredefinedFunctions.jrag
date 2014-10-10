@@ -15,6 +15,8 @@ aspect PredefinedFunctions {
 		print.setName(new FuncIdDecl(new String("print")));
 		print.addParam(new Param(new IntType(), new IdDecl("out")));
 		print.setBlock(new Block());
+		list.add(print);
+		
 		return list;
 	}
 	inh List<FuncDecl> ASTNode.predefinedFunctions();

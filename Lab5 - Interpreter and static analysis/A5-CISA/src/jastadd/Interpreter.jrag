@@ -4,236 +4,232 @@ import java.util.Set;
 import javax.management.RuntimeErrorException;
 
 aspect Interpreter {
-		
-	
-		public class ActivationRecord {
-			private HashMap<String,Integer> map;
-			
-			// identifiera funktionen
-			private ArrayList<Param> par;
-			public String type;
-			public String id;
-			public boolean isMain = false;
-			
-			public ActivationRecord() {
-				map = new HashMap<String,Integer>(); 
-			}
-			
-			int get(String name) {
-				// get method look locally
-				// then outside block
-				// etc.
-				return map.get(name);
-			}
-			
-			void put(String name, int val) {
-				map.put(name,val);
-			}
-			
-			HashMap<String,Integer> map() {
-				return map;
-			}
-		}
-		
-//		// uniqueName
-//		syn String ASTNode.uniqueName() = "";
-//		syn void Program.uniqueName() {
-////			for(int i = 0; i < getNumFunc(); i++) {
-////				getFunc(i).uniqueName = "_"+i;
-////			}
-//		}
-		
-		public abstract int Func.eval(ActivationRecord actrec);
-		
-		public void Program.eval() {
-			if(main() == null)
-				throw new RuntimeException("Function 'main' not found.");
-			
-			main().eval(new ActivationRecord());
-		}
-		
-		public int FuncDecl.eval(ActivationRecord actrec) {
-//			actrec.isMain = true;
-			actrec.id = getName().getID();
-			actrec.type = getType().getType();
-			int result = 0;
 
-			try {
-				getBlock().eval(actrec);
-			} catch (RuntimeException e) {
-				result = Integer.valueOf(e.getMessage());
-			}
-			
-			//System.out.println(actrec.map().toString());
-			
-			
-			FuncUseExpr u;
-			  Iterator<FuncUseExpr> i = getName().uses().iterator();
-			  System.out.print(getName().getID() + " coll FuncIdDecl contains:");
-			  while(i.hasNext()) {
-				  u = i.next();
-				  System.out.print(" " + u.getID() + ",");
-			  }
-			  System.out.println();
-			
-			
-			return result;
+
+	public class ActivationRecord {
+		private HashMap<String,Integer> map;
+
+		// identifiera funktionen
+		private ArrayList<Param> par;
+		public String type;
+		public String id;
+		public boolean isMain = false;
+
+		public ActivationRecord() {
+			map = new HashMap<String,Integer>(); 
 		}
-		
-		private static boolean Block.hasReturned = false;
-		public void Block.eval(ActivationRecord actrec) {
-//			if(hasReturned) return;
-//			for(int i = 0; i < getNumStmt(); i++) {
-//				if(hasReturned) break;
-//				getStmt(i).eval(actrec);
-//			}	
-				
+
+		int get(String name) {
+			// get method look locally
+			// then outside block
+			// etc.
+			return map.get(name);
+		}
+
+		void put(String name, int val) {
+			map.put(name,val);
+		}
+
+		HashMap<String,Integer> map() {
+			return map;
+		}
+	}
+
+	//		// uniqueName
+	//		syn String ASTNode.uniqueName() = "";
+	//		syn void Program.uniqueName() {
+	////			for(int i = 0; i < getNumFunc(); i++) {
+	////				getFunc(i).uniqueName = "_"+i;
+	////			}
+	//		}
+
+	public abstract int Func.eval(ActivationRecord actrec);
+
+	public void Program.eval() {
+		if(main() == null)
+			throw new RuntimeException("Function 'main' not found.");
+
+		main().eval(new ActivationRecord());
+	}
+
+	public int FuncDecl.eval(ActivationRecord actrec) {
+		//			actrec.isMain = true;
+		actrec.id = getName().getID();
+		actrec.type = getType().getType();
+		int result = 0;
+
+		try {
+			getBlock().eval(actrec);
+		} catch (RuntimeException e) {
+			if(e.getMessage() != null)
+				result = Integer.valueOf(e.getMessage());
+		}
+
+		//System.out.println(actrec.map().toString());
+
+
+//		FuncUseExpr u;
+//		Iterator<FuncUseExpr> i = getName().functionCalls().iterator();
+//		System.out.print(getName().getID() + " coll FuncIdDecl contains:");
+//		while(i.hasNext()) {
+//			u = i.next();
+//			System.out.print(" " + u.getID() + ",");
+//		}
+		System.out.print("reachable " + getName().getID() + ":");
+		for(FuncDecl f : reachable()) {
+			System.out.print("," + f.getName().getID());
+		}
+		System.out.println();
+
+
+		return result;
+	}
+
+	private static boolean Block.hasReturned = false;
+	public void Block.eval(ActivationRecord actrec) {
+		//			if(hasReturned) return;
+		//			for(int i = 0; i < getNumStmt(); i++) {
+		//				if(hasReturned) break;
+		//				getStmt(i).eval(actrec);
+		//			}	
+		if(hasStmt())
 			for(Stmt s : getStmtList()) {
 				s.eval(actrec);
 			}
-		}
-		
-		public abstract void Stmt.eval(ActivationRecord actrec);
-		public void DeclAssignStmt.eval(ActivationRecord actrec){
-			Type t = getType();
-			IdDecl d = getIdDecl();
-			Expr e = getExpr();
-			String id = d.uniqueName();
-			
-			int result = e.eval(actrec);
-			actrec.put(id, result);
-		}
-		public void DeclStmt.eval(ActivationRecord actrec){
-			Type t = getType();
-			IdDecl d = getIdDecl();
-			String id = d.uniqueName();
-//			actrec.put(id, );
-			
-		}
-		
-		public void AssignStmt.eval(ActivationRecord actrec){
-			IdUseExpr u = getIdUseExpr();
-			Expr e = getExpr();
-			String id = u.decl().uniqueName();
-			int result = e.eval(actrec);
-			System.out.println("ASSIGN RESULT is: " + result);			
-			actrec.put(id, result);
-		}
-		
-		public void ReturnStmt.eval(ActivationRecord actrec) throws RuntimeException {
-			Expr e = getExpr();
-			int result = e.eval(actrec);
-			throw new RuntimeException(String.valueOf(result));
-		}
-		public void IfStmt.eval(ActivationRecord actrec){
-			Expr e = getExpr();
-			int result = e.eval(actrec);
-			Block ib = getThen();
-			Block eb = getElse();
-			
-			if(result > 0)
-				ib.eval(actrec);
-			else if(hasElse())
-				eb.eval(actrec);
-		}
-		public void WhileStmt.eval(ActivationRecord actrec){
-			Expr e = getExpr();
-			Block b = getBlock();
-			int result = e.eval(actrec);
-			
-			
-			// TODO: how? 0 1
-			while((result = e.eval(actrec)) == 1) {
-				System.out.println("RESULT is: " + result);
-//				if(result > 0) {
-				b.eval(actrec);
-//				} else {
-//					break;
-//				}
-			}
-		}
-		
-		public void PrintStmt.eval(ActivationRecord actrec){
-			Expr e = getExpr();
-			int result = e.eval(actrec);
-			
-			System.out.println(result);
-//			throw new RuntimeException();
-		}
-		public void Param.eval(ActivationRecord actrec){
-			throw new RuntimeException();
-		}
-		public int IdUseExpr.eval(ActivationRecord actrec) {
-			String id = decl().uniqueName();
-			int result = actrec.get(id);
-			return result;
-		}
-		public int FuncUseExpr.eval(ActivationRecord actrec) {
-			ActivationRecord actrec_new = new ActivationRecord();
-			FuncDecl f = decl().func();
-			for(int i = 0; i < getNumExpr(); i++) {
-				actrec_new.put(f.getParam(i).getIdDecl().uniqueName(), getExpr(i).eval(actrec));
-			}
-			return decl().func().eval(actrec_new);
-		}
-		
-		public int ReadFunc.eval(ActivationRecord actrec) {
-			throw new RuntimeException("ReadFunc not implemented in Interpreter");
-//			return decl().eval(actrec);
-		}
-		
-		
-		// DONE
-		// bool is 0 or 1
-		public abstract int 	Expr.eval(ActivationRecord actrec);
+	}
 
-//		public abstract boolean BinExpr.eval(ActivationRecord actrec);
-		
-		public int BoolLiteral.eval(ActivationRecord actrec) {
-			return getBOOLEAN().equals("true") ? 1 : 0;
-		}
-		
-		public int IntLiteral.eval(ActivationRecord actrec) {
-			return Integer.parseInt(getNUMERAL());
-		}
-		
-		public int Add.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) + getRight().eval(actrec);
-		}
-		
-		public int Sub.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) - getRight().eval(actrec);
-		}
-			
-		public int Mul.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) * getRight().eval(actrec);
-		}
+	public abstract void Stmt.eval(ActivationRecord actrec);
+	public void DeclAssignStmt.eval(ActivationRecord actrec){
+		Type t = getType();
+		IdDecl d = getIdDecl();
+		Expr e = getExpr();
+		String id = d.uniqueName();
 
-		public int Div.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) / getRight().eval(actrec);
-		}
+		int result = e.eval(actrec);
+		actrec.put(id, result);
+	}
+	public void DeclStmt.eval(ActivationRecord actrec){
+		Type t = getType();
+		IdDecl d = getIdDecl();
+		String id = d.uniqueName();
+		//			actrec.put(id, );
 
-		public int Mod.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) % getRight().eval(actrec);
+	}
+
+	public void AssignStmt.eval(ActivationRecord actrec){
+		IdUseExpr u = getIdUseExpr();
+		Expr e = getExpr();
+		String id = u.decl().uniqueName();
+		int result = e.eval(actrec);
+		System.out.println("ASSIGN RESULT is: " + result);			
+		actrec.put(id, result);
+	}
+
+	public void ReturnStmt.eval(ActivationRecord actrec) throws RuntimeException {
+		Expr e = getExpr();
+		int result = e.eval(actrec);
+		throw new RuntimeException(String.valueOf(result));
+	}
+	public void IfStmt.eval(ActivationRecord actrec){
+		Expr e = getExpr();
+		int result = e.eval(actrec);
+		Block ib = getThen();
+		Block eb = getElse();
+
+		if(result > 0)
+			ib.eval(actrec);
+		else if(hasElse())
+			eb.eval(actrec);
+	}
+	public void WhileStmt.eval(ActivationRecord actrec){
+		Expr e = getExpr();
+		Block b = getBlock();
+		int result = e.eval(actrec);
+
+
+		// TODO: how? 0 1
+		while((result = e.eval(actrec)) == 1) {
+			System.out.println("RESULT is: " + result);
+			//				if(result > 0) {
+			b.eval(actrec);
+			//				} else {
+			//					break;
+			//				}
 		}
-		
-		public int GT.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) >  getRight().eval(actrec) ? 1 : 0;
+	}
+
+	public void CallStmt.eval(ActivationRecord actrec){
+		Expr e = getFuncUseExpr();
+		e.eval(actrec);
+	}
+	public void Param.eval(ActivationRecord actrec){
+		throw new RuntimeException();
+	}
+	public int IdUseExpr.eval(ActivationRecord actrec) {
+		String id = decl().uniqueName();
+		int result = actrec.get(id);
+		return result;
+	}
+	public int FuncUseExpr.eval(ActivationRecord actrec) {
+		ActivationRecord actrec_new = new ActivationRecord();
+		FuncDecl f = decl().func();
+		for(int i = 0; i < getNumExpr(); i++) {
+			actrec_new.put(f.getParam(i).getIdDecl().uniqueName(), getExpr(i).eval(actrec));
 		}
-		public int LT.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) <  getRight().eval(actrec) ? 1 : 0;
-		}	
-		public int GE.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) >= getRight().eval(actrec) ? 1 : 0;
-		}
-		public int LE.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) <= getRight().eval(actrec) ? 1 : 0;
-		}
-		public int EQ.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) == getRight().eval(actrec) ? 1 : 0;
-		}
-		public int NE.eval(ActivationRecord actrec) {
-			return getLeft().eval(actrec) != getRight().eval(actrec) ? 1 : 0;
-		}
-		
+		return decl().func().eval(actrec_new);
+	}
+
+	// DONE
+	// bool is 0 or 1
+	public abstract int 	Expr.eval(ActivationRecord actrec);
+
+	//		public abstract boolean BinExpr.eval(ActivationRecord actrec);
+
+	public int BoolLiteral.eval(ActivationRecord actrec) {
+		return getBOOLEAN().equals("true") ? 1 : 0;
+	}
+
+	public int IntLiteral.eval(ActivationRecord actrec) {
+		return Integer.parseInt(getNUMERAL());
+	}
+
+	public int Add.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) + getRight().eval(actrec);
+	}
+
+	public int Sub.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) - getRight().eval(actrec);
+	}
+
+	public int Mul.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) * getRight().eval(actrec);
+	}
+
+	public int Div.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) / getRight().eval(actrec);
+	}
+
+	public int Mod.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) % getRight().eval(actrec);
+	}
+
+	public int GT.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) >  getRight().eval(actrec) ? 1 : 0;
+	}
+	public int LT.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) <  getRight().eval(actrec) ? 1 : 0;
+	}	
+	public int GE.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) >= getRight().eval(actrec) ? 1 : 0;
+	}
+	public int LE.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) <= getRight().eval(actrec) ? 1 : 0;
+	}
+	public int EQ.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) == getRight().eval(actrec) ? 1 : 0;
+	}
+	public int NE.eval(ActivationRecord actrec) {
+		return getLeft().eval(actrec) != getRight().eval(actrec) ? 1 : 0;
+	}
+
 }		
