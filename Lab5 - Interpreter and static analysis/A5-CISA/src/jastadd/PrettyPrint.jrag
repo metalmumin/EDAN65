@@ -126,45 +126,45 @@ aspect PrettyPrint {
 	}
 	
 	public String Add.getOperator() {
-		return (" + ");
+		return ("+");
 	}
 	
 	public String Sub.getOperator() {
-		return (" - ");
+		return ("-");
 	}
 	
 	public String Mul.getOperator() {
-		return (" * ");
+		return ("*");
 	}
 
 	public String Div.getOperator() {
-		return (" / ");
+		return ("/");
 	}
 
 	public String Mod.getOperator() {
-		return (" % ");
+		return ("%");
 	}
 	public String GT.getOperator() {
-		return (" > ");
+		return (">");
 	}
 	
 	public String LT.getOperator() {
-		return (" < ");
+		return ("<");
 		
 	}	
 	public String GE.getOperator() {
-		return (" >= ");
+		return (">=");
 	}
 	public String LE.getOperator() {
-		return (" <= ");
+		return ("<=");
 	}
 	
 	public String EQ.getOperator() {
-		return (" == ");
+		return ("==");
 	}
 	
 	public String NE.getOperator() {
-		return (" != ");
+		return ("!=");
 	}
 	
 	public String IdUseExpr.prettyString() {
@@ -172,7 +172,8 @@ aspect PrettyPrint {
 	}
 
 	public String IdDecl.prettyString() {
-		return getID();
+//		return getID();
+		return uniqueName();
 	}
 	
 	public String FuncIdDecl.prettyString() {

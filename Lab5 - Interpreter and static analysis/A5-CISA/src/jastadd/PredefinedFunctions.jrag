@@ -17,4 +17,6 @@ aspect PredefinedFunctions {
 		print.setBlock(new Block());
 		return list;
 	}
+	inh List<FuncDecl> ASTNode.predefinedFunctions();
+	eq Program.getChild().predefinedFunctions() = predefinedFunctions();
 }

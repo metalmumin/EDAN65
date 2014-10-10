@@ -1,0 +1,13 @@
+import java.util.Set;
+import java.util.HashSet;
+
+aspect UniqueName {
+	eq FuncDecl.getBlock().uniqueIdDeclName(String name) = name;
+	eq FuncDecl.getParam().uniqueIdDeclName(String name) = name;
+	
+	inh String Block.uniqueIdDeclName(String name);
+	eq	Block.getStmt(int index).uniqueIdDeclName(String name) = uniqueIdDeclName(index + "_" + name);
+
+	inh String IdDecl.uniqueIdDeclName(String name);
+	syn String IdDecl.uniqueName() = uniqueIdDeclName(getID());
+}

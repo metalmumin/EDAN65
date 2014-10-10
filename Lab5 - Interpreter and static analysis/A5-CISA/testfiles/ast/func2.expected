@@ -2,7 +2,7 @@ Program
   List
     FuncDecl
       IntType
-      IdDecl
+      FuncIdDecl
       List
         Param
           IntType
@@ -14,7 +14,7 @@ Program
         List
     FuncDecl
       IntType
-      IdDecl
+      FuncIdDecl
       List
       Block
         List

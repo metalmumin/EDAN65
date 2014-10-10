@@ -95,6 +95,9 @@ aspect NameAnalysis {
 /**
  * Function lookup-pattern: FuncDecl
  */
+	
+	
+	
 
 	/**
 	 * Start lookup pattern isMultiplyDeclared - (foreach)
@@ -107,6 +110,18 @@ aspect NameAnalysis {
 	 */
 	inh FuncIdDecl FuncUseExpr.func(String name);
 	syn FuncIdDecl FuncUseExpr.decl() = func(getID());
+	
+	/**
+	 * Catch PrintStmt
+	 */
+//	eq PrintStmt.getFuncUseExpr().func(String name) {
+//		for(FuncDecl f : predefinedFunctions()) {
+//			if(f.getName().getID().equals(name)) {
+//				return f.getName(); 
+//			}
+//		}
+//		return unknownFunc();
+//	}
 	
 	/**
 	 * abstract Func
@@ -137,6 +152,15 @@ aspect NameAnalysis {
 			}
 		}
 		return unknownFunc();
+	}
+	syn FuncDecl Program.main() {
+		for (Func f : getFuncList()) {
+			FuncIdDecl decl = f.func("main");
+			if (decl.getID().equals("main")) {
+				return (FuncDecl) f;
+			}
+		}
+		return null;
 	}
 }
 

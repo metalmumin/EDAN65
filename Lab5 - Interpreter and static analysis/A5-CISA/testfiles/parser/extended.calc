@@ -1,6 +1,13 @@
-int gcd2(int ds, int sb) {
-	int d;
-	int d;
-	int ds;
-	int f = gcd2(gcd2(4,3),false);
+int fac(int n) {
+	if (n <= 1) {
+		return 1;
+	} else { 
+		return fac(n-1) * n;
+	}
+}
+int f() {
+	print(fac(5));
+}
+int main() {
+	return f();
 }

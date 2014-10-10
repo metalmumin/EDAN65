@@ -13,13 +13,13 @@ abstract Stmt;
 Param : Stmt ::= Type IdDecl;
 Block : Stmt ::= Stmt*;
 
-WhileStmt : Stmt ::= Expr Block;
-IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
-ReturnStmt: Stmt ::= Expr;
-AssignStmt: Stmt ::= IdUseExpr Expr;
-DeclStmt  : Stmt ::= Type IdDecl;
-PrintStmt : Stmt ::= Expr;
 DeclAssignStmt : Stmt ::= Type IdDecl Expr;
+DeclStmt  : Stmt ::= Type IdDecl;
+AssignStmt: Stmt ::= IdUseExpr Expr;
+IfStmt	  : Stmt ::= Expr Then:Block [Else:Block];
+WhileStmt : Stmt ::= Expr Block;
+ReturnStmt: Stmt ::= Expr;
+PrintStmt : Stmt ::= Expr;
 
 abstract Expr;
 abstract BinExpr	: Expr ::= Left:Expr Right:Expr;

@@ -2,7 +2,7 @@ Program
   List
     FuncDecl
       IntType
-      IdDecl
+      FuncIdDecl
       List
       Block
         List
@@ -35,7 +35,7 @@ Program
             IdUseExpr
     FuncDecl
       IntType
-      IdDecl
+      FuncIdDecl
       List
         Param
           IntType
@@ -47,7 +47,7 @@ Program
         List
     FuncDecl
       IntType
-      IdDecl
+      FuncIdDecl
       List
         Param
           IntType
@@ -73,13 +73,11 @@ Program
               Opt
           PrintStmt
             FuncUseExpr
-              IdUseExpr
               List
                 IdUseExpr
                 IdUseExpr
           PrintStmt
             FuncUseExpr
-              IdUseExpr
               List
                 IdUseExpr
                 IdUseExpr

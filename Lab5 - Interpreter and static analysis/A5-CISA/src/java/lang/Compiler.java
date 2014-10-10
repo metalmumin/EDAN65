@@ -33,6 +33,7 @@ public class Compiler {
 			LangParser parser = new LangParser();
 			Program program = (Program) parser.parse(scanner);
 			program.prettyPrint(System.out);
+			program.checkMSN(System.out);
             System.out.println("\n" + program.dumpTree());
             if (!program.errors().isEmpty()) {
 				System.err.println();
@@ -41,6 +42,8 @@ public class Compiler {
 					System.err.println("- " + e);
 				}
 			} else {
+				
+				System.out.println("\t\t---- \t\t RUNNING INTERPRETER \t\t ----");
 				program.eval();
 			}
 		} catch (FileNotFoundException e) {
