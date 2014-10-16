@@ -1,0 +1,47 @@
+import java.util.Set;
+import java.util.HashSet;
+
+aspect IsAssigned {
+	/**
+	 * Static assignment analysis
+	 */
+	eq Program.getChild().checkAssigned(String name) = false;
+	
+	inh boolean IdUseExpr.checkAssigned(String name);
+	syn boolean IdUseExpr.isAssigned() = checkAssigned(getID());
+//	
+//	inh boolean IdDecl.checkAssigned(String name); 
+//	syn boolean IdDecl.isAssigned() = checkAssigned(getID());
+	
+	eq FuncDecl.getBlock().checkAssigned(String name) = localAssigned(name);
+	syn boolean FuncDecl.localAssigned(String name) {
+		for(Param p : getParamList()) {
+			if(p.getIdDecl().getID().equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	inh boolean Block.checkAssigned(String name);
+	eq	Block.getStmt(int index).checkAssigned(String name) = localAssigned(name,index);
+	syn boolean Block.localAssigned(String name, int until) {
+		for(int i = 0; i <= until; i++) {
+			if(getStmt(i).localAssigned(name))
+				return true;
+		}
+		return checkAssigned(name);
+	}
+	
+	inh boolean Stmt.checkAssigned(String name);
+	eq	Stmt.getChild().checkAssigned(String name) = localAssigned(name) ? true : checkAssigned(name);
+	syn boolean Stmt.localAssigned(String name) = false;
+	
+	inh boolean AssignStmt.checkAssigned(String name);
+	eq	AssignStmt.getIdUseExpr().checkAssigned(String name) = localAssigned(name);
+	syn boolean AssignStmt.localAssigned(String name) = getIdUseExpr().getID().equals(name) ? true : false;
+	
+	inh boolean DeclAssignStmt.checkAssigned(String name);
+	eq	DeclAssignStmt.getIdDecl().checkAssigned(String name) = localAssigned(name);
+	syn boolean DeclAssignStmt.localAssigned(String name) = getIdDecl().getID().equals(name) ? true : false;
+}

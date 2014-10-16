@@ -1,0 +1,3 @@
+Error at line 2: symbol 'a' is already declared!
+Error at line 4: symbol 'a' is already declared!
+Error at line 6: symbol 'a' is already declared!

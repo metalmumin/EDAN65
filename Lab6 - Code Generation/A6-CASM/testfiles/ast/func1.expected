@@ -1,0 +1,8 @@
+Program
+  List
+    FuncDecl
+      IntType
+      FuncIdDecl
+      List
+      Block
+        List

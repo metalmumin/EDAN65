@@ -1,0 +1,99 @@
+import java.io.PrintStream;
+import java.util.Set;
+import java.util.HashSet;
+
+aspect MaximumStatementNesting {
+	public class NestingTable {
+		private Set<Integer> scopes;
+		
+		public NestingTable() {
+			scopes = new HashSet<Integer>();
+		}
+
+		/**
+		 * Attempt to add a new scope depth to the nesting table.
+		 * @return true if name was not already declared
+		 */
+		public boolean add(Integer depth) {
+			return scopes.add(depth);
+			
+		}
+
+		public String print() {
+			return scopes.toString();
+		}
+	}
+
+	/**
+	 * @param err where to write error messages
+	 */
+	public void Program.checkMSN(PrintStream out) {
+		NestingTable scopes = new NestingTable();
+		int depth = 0;
+		checkMSN(out, scopes, depth);
+		
+		out.println(scopes.print());
+	}
+
+	/**
+	 * @param err where to write error messages
+	 * @param symbols symbol table
+	 */
+	public void ASTNode.checkMSN(PrintStream out, NestingTable scopes, int depth) {
+		for (int i = 0; i < getNumChild(); ++i) {
+			getChild(i).checkMSN(out, scopes, depth);
+		}
+	}
+
+	public void Block.checkMSN(PrintStream out, NestingTable scopes, int depth) {
+		if(hasStmt()) {
+			for(int i = 0; i < getNumStmt(); ++i) {
+				getStmt(i).checkMSN(out, scopes, depth +1);
+			}
+			scopes.add(depth + 1);
+		}
+	}
+	
+//	public void IfStmt.checkMSN(PrintStream out, NestingTable scopes) {
+//		if(hasStmt()) {
+//			scopes.add(scopes.prevDepth() + 1);
+//			getStmt().checkMSN(out, scopes);
+//		}
+//	}
+	//
+//	public void Let.checkNames(PrintStream err, SymbolTable symbols) {
+//		symbols = symbols.push();
+//		for (int i = 0; i < getNumBinding(); ++i) {
+//			getBinding(i).checkNames(err, symbols);
+//		}
+//		getExpr().checkNames(err, symbols);
+//	}
+//
+//	public void Ask.checkNames(PrintStream err, SymbolTable symbols) {
+//		if (hasDefault()) {
+//			getDefault().checkNames(err, symbols.push());
+//		}
+//	}
+
+//	public void IdDecl.checkNames(PrintStream err, SymbolTable symbols) {
+//		if (!symbols.declare(getID())) {
+//			err.format("Error at line %d: symbol \'%s\' is already declared!", getLine(), getID());
+//			err.println();
+//		}
+//	}
+
+//	public void IdUse.checkNames(PrintStream err, SymbolTable symbols) {
+//		if (!symbols.lookup(getID())) {
+//			err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
+//			err.println();
+//		}
+//	}
+
+//	/**
+//	 * Helper method
+//	 * @return line number of this token
+//	 */
+//	public int ASTNode.getLine() {
+//		return getLine(getStart());
+//	}
+}

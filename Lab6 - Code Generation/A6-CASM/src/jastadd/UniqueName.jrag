@@ -1,0 +1,30 @@
+import java.util.Set;
+import java.util.HashSet;
+
+aspect UniqueName {
+	eq FuncDecl.getBlock().uniqueIdDeclName(String name) = name;
+	eq FuncDecl.getParam().uniqueIdDeclName(String name) = name;
+	
+	inh String Block.uniqueIdDeclName(String name);
+	eq	Block.getStmt(int index).uniqueIdDeclName(String name) = uniqueIdDeclName(index + "_" + name);
+
+	inh String IdDecl.uniqueIdDeclName(String name);
+	syn String IdDecl.uniqueName() = uniqueIdDeclName(getID());
+//	syn String Stmt.uniqueName() = uniqueIdDeclName(getID());
+	
+	
+	// Unique Stmt name
+	eq FuncDecl.getBlock().uniqueExprName(String name) = name;
+	eq FuncDecl.getParam().uniqueExprName(String name) = name;
+	
+	inh String Block.uniqueExprName(String name);
+	eq	Block.getStmt(int index).uniqueExprName(String name) = uniqueExprName(name + "_" + index);
+
+	inh String Stmt.uniqueExprName(String name);
+	syn String Stmt.uniqueName() = uniqueExprName(enclosingFunction().getName().getID());
+	
+	
+	eq FuncDecl.getChild().enclosedLookup() = this;
+	inh FuncDecl Stmt.enclosedLookup();
+	syn FuncDecl Stmt.enclosingFunction() = enclosedLookup();
+}

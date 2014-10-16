@@ -1,0 +1,16 @@
+int fac(int n) {
+	if (n <= 1) { 
+		return 1;
+	} else { 
+		return fac(n-1) * n; 
+	}
+}
+int f() {
+	int u = read(); 
+	print(fac(u));
+	return 0;
+}
+int main() {
+	f();
+	return 0;
+}

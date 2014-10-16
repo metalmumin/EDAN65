@@ -1,0 +1,4 @@
+Error at line 11: symbol 'b' has no value assigned to it
+Error at line 11: symbol 'b' is not declared
+Error at line 14: symbol 'c' has no value assigned to it
+Error at line 14: symbol 'c' is not declared
