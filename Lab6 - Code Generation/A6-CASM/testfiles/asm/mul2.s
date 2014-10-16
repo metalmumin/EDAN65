@@ -10,7 +10,7 @@ _start:
     	movq $0, %rdi
     	movq $60, %rax
     	syscall
-main:
+main: 		 # Has 2 funclocals, and 2 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
     	subq $16, %rsp
@@ -81,7 +81,6 @@ print:
         pushq %rbp
         movq %rsp, %rbp
         ### convert integer to string
-        movq 16(%rbp), %rax     # parameter
         movq $(buf+1023), %rsi  # write ptr (start from end of buf)
         movb $0x0a, (%rsi)      # insert newline
         movq $1, %rcx           # string length

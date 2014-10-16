@@ -10,22 +10,22 @@ _start:
     	movq $0, %rdi
     	movq $60, %rax
     	syscall
-main:
+main: 		 # Has 1 funclocals, and 1 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
     	subq $8, %rsp
 
         # executing 'int a = 2;'
         movq $2, %rax
-        movq %rax, -32(%rbp)	 # move %rax to a
+        movq %rax, -8(%rbp)	 # move %rax to a
 # return stmt 
-    	movq -32(%rbp), %rax 	 # put a into  %rax
-        pushq %rax
+    	movq -8(%rbp), %rax 	 # put a into  %rax
+        pushq %rax	 # Param i = 0
         call f
     	movq %rbp, %rsp
     	popq %rbp
     	ret
-f:
+f: 		 # Has 3 funclocals, and 2 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
         movq 16(%rbp), %rax
@@ -98,7 +98,6 @@ print:
         pushq %rbp
         movq %rsp, %rbp
         ### convert integer to string
-        movq 16(%rbp), %rax     # parameter
         movq $(buf+1023), %rsi  # write ptr (start from end of buf)
         movb $0x0a, (%rsi)      # insert newline
         movq $1, %rcx           # string length

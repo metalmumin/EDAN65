@@ -5,12 +5,23 @@ int fac(int n) {
 		return fac(n-1) * n; 
 	}
 }
+
+int fa(int a, int b, int c, int d) {
+	int g = a + b * c + d;
+	print(g); 
+	return g;
+}
+
 int f() {
-	int u = read(); 
-	print(fac(u));
+	int u = 1000;
+	int a = fa(9,1,1,u);
+	print(a);
+	print(fac(5));
+	
 	return 0;
 }
 int main() {
 	f();
+	bool t = 3 == 3;
 	return 0;
 }

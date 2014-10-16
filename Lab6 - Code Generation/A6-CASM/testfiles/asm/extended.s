@@ -10,18 +10,28 @@ _start:
     	movq $0, %rdi
     	movq $60, %rax
     	syscall
-main:
+main: 		 # Has 1 funclocals, and 1 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
-    	subq $0, %rsp
+    	subq $8, %rsp
         call f
+
+        # executing 'int t = 3==3;'
+        movq $3, %rax
+        pushq %rax
+        movq $3, %rax
+        movq %rax, %rbx
         popq %rax
+        cmpq %rbx, %rax 	 # the result of the boolean operation EQ is in %al, which resides within %rax
+        movq $0, %rax
+        sete %al
+        movq %rax, -8(%rbp)	 # move %rax to t
 # return stmt 
         movq $0, %rax
     	movq %rbp, %rsp
     	popq %rbp
     	ret
-fac:
+fac: 		 # Has 1 funclocals, and 0 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
         movq 16(%rbp), %rax
@@ -59,7 +69,7 @@ fac_0_else_lbl:
         movq %rax, %rbx
         popq %rax
         subq %rbx, %rax
-        pushq %rax
+        pushq %rax	 # Param i = 0
         call fac
         pushq %rax
     	movq -8(%rbp), %rax 	 # put n into  %rax
@@ -71,20 +81,73 @@ fac_0_else_lbl:
     	ret
 fac_0_fi:
         # done
-f:
+fa: 		 # Has 5 funclocals, and 1 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
+        movq 16(%rbp), %rax
+        pushq %rax
+        movq 24(%rbp), %rax
+        pushq %rax
+        movq 32(%rbp), %rax
+        pushq %rax
+        movq 40(%rbp), %rax
+        pushq %rax
     	subq $8, %rsp
 
-        # executing 'int u = read();'
-        call read
-        movq %rax, -16(%rbp)	 # move %rax to u
-    	movq -16(%rbp), %rax 	 # put u into  %rax
+        # executing 'int g = a+b*c+d;'
+    	movq -8(%rbp), %rax 	 # put a into  %rax
         pushq %rax
-        call fac
+    	movq -16(%rbp), %rax 	 # put b into  %rax
         pushq %rax
-        call print
+    	movq -24(%rbp), %rax 	 # put c into  %rax
+        movq %rax, %rbx
         popq %rax
+        imulq %rbx, %rax
+        movq %rax, %rbx
+        popq %rax
+        addq %rbx, %rax
+        pushq %rax
+    	movq -32(%rbp), %rax 	 # put d into  %rax
+        movq %rax, %rbx
+        popq %rax
+        addq %rbx, %rax
+        movq %rax, -40(%rbp)	 # move %rax to g
+    	movq -40(%rbp), %rax 	 # put g into  %rax
+        pushq %rax 	 # Param i = 0
+        call print
+# return stmt 
+    	movq -40(%rbp), %rax 	 # put g into  %rax
+    	movq %rbp, %rsp
+    	popq %rbp
+    	ret
+f: 		 # Has 2 funclocals, and 2 blocklocals
+    	pushq %rbp
+    	movq %rsp, %rbp
+    	subq $16, %rsp
+
+        # executing 'int u = 1000;'
+        movq $1000, %rax
+        movq %rax, -8(%rbp)	 # move %rax to u
+
+        # executing 'int a = fa(9,1,1,u);'
+    	movq -8(%rbp), %rax 	 # put u into  %rax
+        pushq %rax	 # Param i = 3
+        movq $1, %rax
+        pushq %rax	 # Param i = 2
+        movq $1, %rax
+        pushq %rax	 # Param i = 1
+        movq $9, %rax
+        pushq %rax	 # Param i = 0
+        call fa
+        movq %rax, -16(%rbp)	 # move %rax to a
+    	movq -16(%rbp), %rax 	 # put a into  %rax
+        pushq %rax 	 # Param i = 0
+        call print
+        movq $5, %rax
+        pushq %rax	 # Param i = 0
+        call fac
+        pushq %rax 	 # Param i = 0
+        call print
 # return stmt 
         movq $0, %rax
     	movq %rbp, %rsp
@@ -129,7 +192,6 @@ print:
         pushq %rbp
         movq %rsp, %rbp
         ### convert integer to string
-        movq 16(%rbp), %rax     # parameter
         movq $(buf+1023), %rsi  # write ptr (start from end of buf)
         movb $0x0a, (%rsi)      # insert newline
         movq $1, %rcx           # string length

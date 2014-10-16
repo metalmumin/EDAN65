@@ -69,7 +69,7 @@ aspect CodeGen {
 		out.println("        pushq %rbp");
 		out.println("        movq %rsp, %rbp");
 		out.println("        ### convert integer to string");
-		out.println("        movq 16(%rbp), %rax     # parameter");
+//		out.println("        movq 16(%rbp), %rax     # parameter");
 		out.println("        movq $(buf+1023), %rsi  # write ptr (start from end of buf)");
 		out.println("        movb $0x0a, (%rsi)      # insert newline");
 		out.println("        movq $1, %rcx           # string length");
@@ -105,12 +105,13 @@ aspect CodeGen {
 	
 	public abstract void 	Expr.genEval(PrintStream out);
 	public void FuncDecl.genEval(PrintStream out) {
-		out.println(getName().getID() + ":");
+		out.println(getName().getID() + ": \t\t # Has " + numLocals() + " funclocals, and " + getBlock().numLocals() + " blocklocals");
 		out.println("    	pushq %rbp");
 		out.println("    	movq %rsp, %rbp");
 		for(Param p : getParams()) {
 			p.genEval(out);
 		}
+		
 		// allocate space for local variables:
 		out.println("    	subq $" + (getBlock().numLocals()*8) + ", %rsp");
 		getBlock().genEval(out);
@@ -120,7 +121,6 @@ aspect CodeGen {
 		for(Stmt s : getStmtList()) {
 			s.genEval(out);
 		}
-
 	}
 
 	public void BoolLiteral.genEval(PrintStream out) {
@@ -253,15 +253,8 @@ aspect CodeGen {
 		out.println("        movq %rax, %rbx");
 		out.println("        popq %rax");
 		out.println("        cmpq %rbx, %rax \t # the result of the boolean operation EQ is in %al, which resides within %rax");
-		out.println("        je eq_" +  + localIndex());
-		out.println("        cmpq %rbx, %rax \t # the result of the boolean operation EQ is in %al, which resides within %rax");
-		out.println("        jne neq_" + localIndex());
-		out.println("eq_" + localIndex() +":");
-		out.println("        movq $1, %rax");
-		out.println("        jmp done_" + localIndex());
-		out.println("neq_" + localIndex() +":");
 		out.println("        movq $0, %rax");
-		out.println("done_" + localIndex() + ":");
+		out.println("        sete %al");
 	}
 	
 	public void NE.genEval(PrintStream out) {
@@ -335,11 +328,11 @@ aspect CodeGen {
 
 	public void CallStmt.genEval(PrintStream out){
 		for(int i = getFuncUseExpr().getNumExpr() - 1; i >= 0; --i) {
+			
 			getFuncUseExpr().getExpr(i).genEval(out);
-			out.println("        pushq %rax");
+			out.println("        pushq %rax \t # Param i = " + i);
 		}
 		out.println("        call " + getFuncUseExpr().getID());
-		out.println("        popq %rax");
 	}
 	public void Param.genEval(PrintStream out){
 		out.println("        movq " + getIdDecl().addressPositive() +", %rax");
@@ -349,7 +342,7 @@ aspect CodeGen {
 	public void FuncUseExpr.genEval(PrintStream out) {
 		for(int i = getNumExpr() - 1; i >= 0; --i) {
 			getExpr(i).genEval(out);
-			out.println("        pushq %rax");
+			out.println("        pushq %rax\t # Param i = " + i);
 		}
 		out.println("        call " + getID());
 	}
@@ -377,6 +370,7 @@ aspect CodeGen {
 	 */
 	syn int ASTNode.localIndex() = prevNode().localIndex();
 	eq Program.localIndex() = 0;
+	eq FuncDecl.localIndex() = 0;
 	eq IdDecl.localIndex() = prevNode().localIndex() + 1;
 
 	inh ASTNode ASTNode.prevNode();

@@ -10,29 +10,29 @@ _start:
     	movq $0, %rdi
     	movq $60, %rax
     	syscall
-main:
+main: 		 # Has 2 funclocals, and 2 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
     	subq $16, %rsp
 
         # executing 'int a = 2;'
         movq $2, %rax
-        movq %rax, -24(%rbp)	 # move %rax to a
+        movq %rax, -8(%rbp)	 # move %rax to a
 
         # executing 'int b = f();'
         call f
-        movq %rax, -32(%rbp)	 # move %rax to b
+        movq %rax, -16(%rbp)	 # move %rax to b
 # return stmt 
-    	movq -24(%rbp), %rax 	 # put a into  %rax
+    	movq -8(%rbp), %rax 	 # put a into  %rax
         pushq %rax
-    	movq -32(%rbp), %rax 	 # put b into  %rax
+    	movq -16(%rbp), %rax 	 # put b into  %rax
         movq %rax, %rbx
         popq %rax
         imulq %rbx, %rax
     	movq %rbp, %rsp
     	popq %rbp
     	ret
-f:
+f: 		 # Has 2 funclocals, and 2 blocklocals
     	pushq %rbp
     	movq %rsp, %rbp
     	subq $16, %rsp
@@ -93,7 +93,6 @@ print:
         pushq %rbp
         movq %rsp, %rbp
         ### convert integer to string
-        movq 16(%rbp), %rax     # parameter
         movq $(buf+1023), %rsi  # write ptr (start from end of buf)
         movb $0x0a, (%rsi)      # insert newline
         movq $1, %rcx           # string length

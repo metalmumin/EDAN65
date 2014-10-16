@@ -2,14 +2,6 @@ import java.util.Set;
 import java.util.HashSet;
 
 aspect IdUses {
-	//	coll HashSet<IdUseExpr> IdDecl.uses() [new HashSet<IdUseExpr>()] with add;	
-	//		IdUseExpr contributes this
-	//		to IdDecl.uses()	
-	//		for decl();
-
-	// FuncIdDecl får ett element när FuncUseExpr får en decl()
-
-
 	syn	Set<FuncDecl> FuncDecl.reachable() circular [new HashSet<FuncDecl>()] {	
 		HashSet<FuncDecl> result = new HashSet<FuncDecl>();
 		for	(FuncDecl f : functionCalls())	{
@@ -30,10 +22,10 @@ aspect IdUses {
 	inh FuncDecl FuncUseExpr.encloseLookup();
 	syn FuncDecl FuncUseExpr.enclosingFunction() = encloseLookup();
 
-
-
-	eq  FuncDecl.getName().funcLookup() = this;
+	eq  FuncDecl.getChild().funcLookup() = this;
 	inh FuncDecl FuncIdDecl.funcLookup();
 	syn FuncDecl FuncIdDecl.func() = funcLookup();
+	inh FuncDecl Stmt.funcLookup();
+	syn FuncDecl Stmt.func() = funcLookup();
 
 }
