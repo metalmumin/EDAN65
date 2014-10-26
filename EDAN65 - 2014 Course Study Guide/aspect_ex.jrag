@@ -1,0 +1,6 @@
+aspect Evaluator {
+  abstract int Expr.value();
+  int Add.value() { 	return getLeft().value() + getRight().value(); }
+  int Sub.value() { return getLeft().value() – getRight().value(); }  
+  int IntExpr.value() { return String.parseInt(getINT()); }
+}

@@ -1,0 +1,1653 @@
+\documentclass[11pt]{beamer}
+\usetheme{Warsaw}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{amsfonts}
+\usepackage{lmodern}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\author{Jakub Gorski (dt07jg8)}
+\title{EDAN65 Compilers - Study Guide}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+\logo{\includegraphics[height=0.8cm]{LundUniversity_C_RGB.png}} 
+%\institute{Lund Technical Faculty} 
+%\date{} 
+%\subject{} 
+\setbeamertemplate{headline}
+{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex]{section in head/foot}%
+    \hbox to .5\paperwidth{\hfil\insertsectionhead\hfil}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex]{subsection in head/foot}%
+    \hbox to .5\paperwidth{\hfil\insertsubsectionhead\hfil}
+  \end{beamercolorbox}%
+}
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+\begin{frame}{Contents}
+\tableofcontents
+\end{frame}
+
+\section{Lecture summary}
+\subsection{Lecture 1: Introduction}
+\begin{frame}
+\frametitle{What are the major compiler phases?}
+\begin{enumerate}
+\item \textbf{Lexical analysis} (scanning of textual source code). 
+
+Returns tokens.
+\item \textbf{Syntactic analysis} (Parsing of tokens).
+
+Returns AST (Abstract syntax tree).
+\item \textbf{Semantic analysis} (Attributes AST).
+
+Returns attributed AST.
+\item \textbf{Intermediate Code Generation}.
+
+Returns intermediate code.
+\item \textbf{Optimization}.
+
+Returns optimized intermediate code.
+\item \textbf{Target code generation}
+
+Returns architecture-specific assembly code. \\Assembler and Linker do the rest.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is the difference between \textbf{analysis} and \textbf{synthesis} phases?}
+\begin{itemize}
+\item Analysis belongs to the \textbf{front-end}, where Lexical- Syntactic- and Semantic analysis are performed \textbf{independent of targeted platform language}. Intermediate code is generated.
+\item Synthesis takes intermediate code, optionally \textbf{optimizes} it, and synthesizes an \textbf{executable} the target platform understands.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why do we use \textbf{intermediate code}? }
+\begin{itemize}
+\item Intermediate code opens possibility of having \textbf{several front-ends and back-ends}.
+\item Each back-end may optimize intermediate code for target platform differently.
+\item Debugging of front-end is easier using an \textbf{interpreter} than a target machine.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is the advantage of \textbf{separating} the front and back ends? }
+\begin{itemize}
+\item Because it is more rational to implement \textbf{m} front-ends and \textbf{n} back-ends, instead of programming \textbf{m*n} compilers.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{lexeme}?}
+\begin{itemize}
+\item A lexeme is a string corresponding to a \textbf{token}.
+\item Example: Token corresponding to \textbf{terminal} macro "\texttt{ID = [a-zA-Z]+}" will have whole words as \textbf{lexemes}.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{token}?}
+\begin{itemize}
+\item A token corresponds to a predefined \textbf{terminal}, which either has a \textbf{symbolic name}, or is defined by a \textbf{regular expression}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is a \textbf{parse tree}?}
+\begin{itemize}
+\item Locally generated and used by \textbf{Syntactic analysis} (Parsing of tokens).
+\item A tree of \textbf{non-terminal} tokens which branches its way down to \textbf{all terminal} tokens.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is an \textbf{abstract syntax tree}?}
+\begin{itemize}
+\item Generated and returned by \textbf{Syntactic analysis}.
+\item A tree of \textbf{non-terminal} tokens which branches its way down to \textbf{only most essential terminal} tokens.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}
+
+\begin{block}{What is \textbf{intermediate code}?}
+\begin{itemize}
+\item Generated and returned by \textbf{Intermediate code generation}.
+\item Assembly-like code that is \textbf{independent} of target-platform, and source language.
+\item Employs a \textbf{virtually unlimited} stack for all \textbf{memory}/register operations.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is the difference between \textbf{assembly code}, \textbf{object code}, and \textbf{executable code}? }
+\begin{itemize}
+\item \textbf{Assembly code} is an unsafe, \textbf{architecture-specific language}.
+\item \textbf{Object code} is returned by the \textbf{Assembler}, which contains global symbols and \textbf{(still) relocatable addresses}.
+\item \textbf{Executable code} is returned by the \textbf{Linker}, where global symbols and relocatable addresses have been replaced by \textbf{absolute addresses}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is \textbf{bytecode}, an \textbf{interpreter}, a \textbf{virtual machine (VM)}?}
+\begin{itemize}
+\item \textbf{Bytecode} is low-level \textbf{platform-independent code} conventionally executed on \textbf{VM}:s.
+\item \textbf{Interpreter} is a computer program that \textbf{directly executes}, i.e. performs, instructions written in a programming or scripting language, \textbf{without previously compiling} them into a machine language program.
+\item \textbf{A VM is an interpreter} that executes low-level, usually platform-independent code. In other contexts, a \textbf{VM} may refer to system virtualization. 
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{JIT compiler}?}
+\begin{itemize}
+\item A \textbf{JIT compiler} is an interpreter or VM that \textbf{compiles} a program \textbf{during} its \textbf{execution} (run-time) – rather than prior to execution.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{What kind of errors can be caught by a compiler? A runtime system?}
+
+
+
+\begin{enumerate}
+\item \textbf{Lexical analysis}; Lexical errors.
+
+Text that cannot be interpreted as a token.
+\item \textbf{Syntactic analysis}; Syntactic errors.
+
+Tokens in the wrong order.
+\item \textbf{Semantic analysis}; Static-semantic errors.
+
+Illegal use of names, types, and other high-level language entities.
+\item \textbf{Intermediate Code Generation}; No errors.
+
+Returns intermediate code.
+\item \textbf{Optimization} (Optional); Possibly no errors.
+
+Returns optimized intermediate code.
+\item \textbf{Target code generation}.
+
+Returns architecture-specific assembly code. \\Assembler and Linker do the rest. Runtime errors may occur.
+\end{enumerate}
+
+\end{frame}
+
+\subsection{Lecture 2: Regular expressions Scanning}
+\begin{frame}
+
+\begin{block}{What is a \textbf{formal language}?}
+\begin{itemize}
+\item An \textbf{alphabet} $\Sigma$ is a set of symbols (\textbf{nonempty}, \textbf{finite} length).
+\item A \textbf{String} is a sequence of symbols (\textbf{finite} length).
+\item A \textbf{formal language} $\Gamma$ is a set of strings (may be \textbf{infinite}).
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{regular expression}?}
+\begin{itemize}
+\item It is a sequence of characters that forms a \textbf{non-recursive search pattern}, mainly for use in pattern matching with strings, or string matching.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is meant by an \textbf{ambiguous lexical definition}?}
+\begin{itemize}
+\item If \textbf{two production rules} can be used to \textbf{match} the same sequence of characters \textbf{then the rule is ambiguous}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{Give some typical examples of ambiguities and how they may be resolved.}
+\begin{itemize}
+\item Given the two productions rules "\texttt{if}" and "\texttt{ifff}". The ambiguity can be resolved by \textbf{longest match}, meaning if there is another rule that can match a longer token, the latter rule will be chosen. This way the scanner will match the longest token possible.
+\item Additionally \textbf{rule priority} is employed when two rules match the same sequence of characters, in which case the first one takes priority.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is a lexical action?}
+\begin{itemize}
+\item Each production rule has the form \texttt{regular-expression \{lexical action\}}, where each lexical action consists of arbitrary Java code. This \textbf{code is run when the token is matched}, consequently the method \texttt{yytext()} returns a lexeme (the token string value).
+\end{itemize}
+\end{block}
+
+\begin{block}{Show how to construct an NFA for a given lexical definition.}
+\begin{itemize}
+\item Read \textbf{L02 p.25} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L02.pdf}
+\end{itemize}
+\end{block}
+
+\begin{block}{Show how to construct an NFA for a given lexical definition.}
+\begin{itemize}
+\item Read \textbf{L02 p.29} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L02.pdf}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{What is the difference between a DFA and and NFA?}
+\begin{block}{NFA (Non-deterministinc Finite Automaton)}
+\begin{itemize}
+\item Two outgoing edges may have \textbf{overlapping character sets}.
+\item $\varepsilon$ edges are \textbf{permitted}.
+\item Every NFA can be translated into an equivalend DFA.
+\item Every DFA is also an NFA.
+\end{itemize}
+\end{block}
+
+\begin{block}{DFA (Deterministinc Finite Automaton)}
+\begin{itemize}
+\item Outgoing edges must have \textbf{disjoint character sets}.
+\item $\varepsilon$ edges are \textbf{prohibited}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Give an example of how to implement a DFA in Java. }
+
+\begin{block}{Table driven}
+\begin{itemize}
+\item Represent the automaton by a table.
+\item Additional table to keep track of final states and token kinds.
+\item A global variable keeps track of the current state.
+\end{itemize}
+\end{block}
+
+\begin{block}{Switch statement}
+\begin{itemize}
+\item Each state is implemented as a switch statement.
+\item Each case implements a state transition as a jump (to another switch statement).
+\item The current state is represented by the program counter. 
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{How is rule priority handled in the implementation?}
+\begin{block}{Longest match?}
+\begin{itemize}
+\item If two rules can be used to match the same sequence of characters, the first one takes priority.
+\item The general idea:
+\begin{enumerate}
+\item When a token is matched don't stop scanning.
+\item When the error state is reached, return the last token matched.
+\item Push read characters that are unused back into the file, so they can be scanned again.
+\item Use a PushbackFile to accomplish this.
+\end{enumerate}
+\end{itemize}
+\end{block}
+
+\begin{block}{EOF?}
+\begin{itemize}
+\item Construct an explicit EOF token when the EOF character is read.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{How is rule priority handled in the implementation?}
+
+\begin{block}{Whitespace?}
+\begin{itemize}
+\item View as tokens of a special kind.
+\item Scan the as normal tokens, but don't create any objects for them.
+\item Loop in \texttt{next()} until a real token has been found.
+\end{itemize}
+\end{block}
+
+\begin{block}{Errors?}
+\begin{itemize}
+\item Construct an explicit ERROR token to be returned when no valid token can be found.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What are lexical states? When are they useful?}
+\begin{itemize}
+\item Some tokens are \textbf{difficult} or \textbf{impossible} (recursive) to define \textbf{using regular expressions}.
+\item \textbf{Lexical states} (sets of token production rules) give the possibility to \textbf{switch token sets} (DFAs) during scanning.
+\item Useful for multi-line comments, HTML, scanning multi-language documents.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\subsection{Lecture 3: Context-free grammars. Introduction to parsing.}
+\begin{frame}
+
+\begin{block}{Construct a CFG for a simple part of a programming language.	}
+\texttt{Stmt -> WhileStmt | AssignStmt | ...}\\
+\texttt{WhileStmt -> WHILE LPAR Exp RPAR Stmt}\\
+\texttt{Exp -> ID | ...}\\
+\texttt{...}\\
+Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest are non-terminal production rules.
+
+\end{block}
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is a \textbf{nonterminal symbol}?}
+\begin{itemize}
+\item A non-token symbol, which are represented by inner nodes in the pares tree.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{terminal symbol}?}
+\begin{itemize}
+\item Terminals are tokens which are leafs in the parse tree.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{production}?}
+\begin{itemize}
+\item A grammar rule defining a non-terminal node.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{start symbol}?}
+\begin{itemize}
+\item The start symbol is the root in the parse tree.
+\item Starting point for the grammar.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is a \textbf{parse tree}?}
+\begin{itemize}
+\item It is a \textbf{derivation tree}, which is the representation of a set of derivations based on a language grammar.
+\item A parse tree must be unambiguous for it to fulfill its task.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is a \textbf{left-hand side} of a production?}
+\begin{itemize}
+\item The left-hand side $X$ of a production rule is a non-terminal.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{right-hand side} of a production?}
+\begin{itemize}
+\item The right-hand side $Y_1 Y_2 ... Y_{n-1} Y_{n}$  is a sequence of nonterminals and terminals.
+\item If the right-hand side for a production is empty we write $\varepsilon$.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{Given a grammar $G$, what is meant by the language $L(G)$?}
+\begin{itemize}
+\item $G$ defines a language $L(G)$ over the alphabet $T$.
+\item Where $G=(N,T,P,S)$.
+\begin{itemize}
+\item $N$ - set of \textbf{nonterminal} symbols.
+\item $T$ - set of \textbf{terminal} symbols.
+\item $P$ - set of \textbf{production rules}.
+\item $S$ - \textbf{start symbol}, which is a \textbf{nonterminal}.
+\end{itemize}
+\item $T*$ is the set of \textbf{all possible terminals} symbol sequences.
+\item $L(G)$ is a \textbf{subset} of $T^*$, which can be derived by traversing the \textbf{parse tree}, beginning with the \textbf{root} start symbol $S$, then \textbf{following} the \textbf{production rules} $P$.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{What is a \textbf{derivation step}?}
+\begin{itemize}
+\item It is a process where we can \textbf{replace} a \textbf{nonterminal} i a given \textbf{sequence} of terminals and nonterminals by \textbf{applying} \textbf{production rules}.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a \textbf{derivation}?}
+\begin{itemize}
+\item It is a sequence of derivation steps.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is \textbf{leftmost derivation}?}
+\begin{itemize}
+\item In a leftmost derivation, the leftmost nonterminal is replaced in each derivation step.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is \textbf{rightmost derivation}?}
+\begin{itemize}
+\item In a rightmost derivation, the rightmost nonterminal is replaced in each derivation step.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{How does a derivation correspond to a parse tree?}
+\begin{itemize}
+\item Nonterminals are \textbf{nodes} and terminals are \textbf{leafs} in the tree.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What does it mean for a grammar to be \textbf{ambiguous}?}
+\begin{itemize}
+\item \texttt{CFG} (Context Free Grammar) is ambiguous if a sentence in the language can be derived by \textbf{two (or more)} different parse trees.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What does it mean for a grammar to be \textbf{unambiguous}?}
+\begin{itemize}
+\item \texttt{CFG} is unambiguous if each sentence in the language can be derived by \textbf{only one} syntax tree.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{Give an example an ambiguous \textbf{CFG}.}
+
+\texttt{Exp -> Exp "+" Exp }\\
+\texttt{Exp -> Exp "*" Exp }\\
+\texttt{Exp -> INT}\\
+Ambiguity due to the \textbf{lack of operator precedence}, thus multiplication and addition has equal evaluation rights.
+\end{block}
+
+\begin{block}{What is the difference between an \textbf{LL }and an \textbf{LR }parser?}
+\begin{itemize}
+\item \textbf{LL}: \textbf{L}eft-to-right scan \textbf{L}eftmost derivation.
+\begin{itemize}
+\item Builds tree \textbf{top-down}.
+\item Simple to understand.
+\end{itemize}
+\item \textbf{LR}: \textbf{L}eft-to-right scan \textbf{R}ightmost derivation.
+\begin{itemize}
+\item Builds tree \textbf{bottom-up}.
+\item Can scan more \texttt{CFG}:s than \textbf{LL}, therefore more powerful.
+\end{itemize}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is the difference between \textbf{LL(1)} and \textbf{LL(2)}? Or between \textbf{LR(1)} and \textbf{LR(2)}?}
+\begin{itemize}
+\item LL($k$) and LR($k$), where $k$ denotes the number of lookahead tokens.
+\item May look $k$ tokens into the scanner in order to decide which nonterminal production to apply.
+\end{itemize}
+\end{block}
+
+\begin{block}{Construct a recursive descent parser for a simple language.}
+\texttt{A -> B | C | D }\\
+\texttt{B -> e C f D }\\
+\texttt{C -> ...}\\
+\texttt{D -> ...}\\
+Where, \texttt{terminals = \{e, f\}} are predefined.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{Give typical examples of grammars that cannot be handled by a recursive- descent parser.}
+\begin{itemize}
+\item Grammars that have circular dependencies, which cause infinite left-recursion, and those that are ambiguous.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{Explain why context-free grammars are more powerful than regular expressions.}
+\begin{itemize}
+\item Because a \texttt{CFG} can handle recursion.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{In what sense are context-free grammars ”context-free"?}
+\begin{itemize}
+\item CFG is not constrained to one grammar (tree), thus may change evaluation rules depending on subtree, which can be an entire language.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\subsection{Lecture 4: Ambiguities LL problems}
+\begin{frame}
+
+\begin{block}{What does it mean for a grammar to be ambiguous?}
+\begin{itemize}
+\item A \texttt{CFG} is ambiguous if there is a sentence in the language that can be derived by two (or more) different parse trees.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What does it mean for two grammars to be equivalent?}
+\begin{itemize}
+\item Two grammars, G1 and G2, are equivalent if they generate the same language.
+\end{itemize}
+\end{block}
+
+\begin{block}{Exemplify some common kinds of ambiguities.}
+\begin{itemize}
+\item Operators with different priorities.
+\item Associativity of operators with same priority.
+\item Dangling \texttt{else}.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{Exemplify how expression grammars can be disambiguated.}
+\begin{itemize}
+\item Subtrees for \texttt{INT "+" INT "*" INT}, with rule-priority.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is the "dangling else"-problem, and how can it be solved?}
+\begin{itemize}
+\item Two possible parse trees pose a problem. Three possible solutions:
+\begin{enumerate}
+\item Rewrite to equivalent unambiguous grammar possible. However this results in more complex grammar.
+\item Use the ambiguous grammar:
+\begin{itemize}
+\item Use \textbf{rule priority} such that the parser can select the correct rule.
+\item Works for the dangling else problem, but not for ambiguous grammars in general.
+\item Not allparser generators support this well.
+\end{itemize}
+\item Change the language:
+\begin{itemize}
+\item E.g. add a terminal \texttt{fi} that closes the if-statement.
+\item Restrict the \texttt{then} part to be a block: \texttt{\{ ... \}}.
+\item Not always an option.
+\end{itemize}
+\end{enumerate}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{When should we use canonical form, and when BNF or EBNF?}
+\begin{itemize}
+\item Canonical sequence of terminals and nonterminals.
+\item \textbf{BNF} (Backus-Naur Form) alternative productions\\ \texttt{( ... | ... | ... )}.
+\item \textbf{EBNF} (Extended Backus-Naur Form) repetition (\texttt{*} and \texttt{+}), parentheses \texttt{(...)}.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is a \textbf{common prefix}?}
+\begin{itemize}
+\item Two derivations rules starting with same token.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{Exemplify how a common prefix can be eliminated.}
+\begin{itemize}
+\item Rewrite to an equivalent grammar without the common prefix
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{Exemplify how a common prefix can be eliminated.}
+\begin{itemize}
+\item Rewrite to an equivalent grammar without the common prefix.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is \textbf{left factoring}?}
+\begin{itemize}
+\item Refactoring the leftmost common prefix.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is \textbf{left recursion}?}
+\begin{itemize}
+\item The leftmost expression could go to endless recursion.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}
+
+
+\begin{block}{Exemplify how left recursion can be eliminated in a grammar on canonical form.}
+\begin{itemize}
+\item Left recursive:
+\begin{itemize}
+\item
+\texttt{E -> E "+" T }\\
+\texttt{E -> T}\\
+\texttt{T -> ID}
+\end{itemize}
+\end{itemize}
+\begin{enumerate}
+\item Rewrite to right-recursion!
+\begin{itemize}
+\item 
+\texttt{E -> T "+" E}\\
+\texttt{E -> T}\\
+\texttt{T -> ID}
+
+\end{itemize}
+\item Eliminate the common prefix. The grammar is now $LL(1)$:
+\begin{itemize}
+\item
+\texttt{E -> T E' }\\
+\texttt{E' -> "+" E }\\
+\texttt{E' -> $\epsilon$}\\
+\texttt{T -> ID}
+\end{itemize}
+\end{enumerate}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{Exemplify how left recursion can be eliminated using EBNF.}
+\begin{itemize}
+\item Left recursive:
+\begin{itemize}
+\item
+\texttt{E -> E "+" T }\\
+\texttt{E -> T}\\
+\texttt{T -> ID}
+\end{itemize}
+\end{itemize}
+\begin{enumerate}
+\item Rewrite to EBNF!
+\begin{itemize}
+\item 
+\texttt{E -> E ( ”+" T )*}\\
+\texttt{E -> ID}\\
+
+\end{itemize}
+\end{enumerate}
+\end{block}
+
+\begin{block}{Which parsing algorithms handle common prefixes and left recursion? }
+\begin{itemize}
+\item $LL(k)$, \textbf{no}.
+\item $LR(k)$, \textbf{yes}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\subsection{Lecture 5: Abstract syntax trees and LR parsing}
+\begin{frame}
+
+\begin{block}{How does LR differ from LL parsers?}
+\begin{itemize}
+\item $LL(k)$: The tree is built \textbf{top-down}.
+\item $LR(k)$: The tree is built \textbf{bottom-up}.
+\end{itemize}
+\end{block}
+
+\begin{block}{What does it mean to \textbf{shift}?}
+\begin{itemize}
+\item \textbf{Shift}: move the input token to the \textbf{top of the stack}.
+\end{itemize}
+\end{block}
+
+
+
+\begin{block}{What does it mean to \textbf{reduce}?}
+\begin{itemize}
+\item \textbf{Reduce}: modify the stack by \textbf{applying a production}.
+\begin{enumerate}
+\item If $\gamma$ is on the top of the stack, we can pop $\gamma$ and push $X$. This is called reducing $\gamma$ to $X$.
+\item Accept – when the parser is about to shift \$, the parse is complete, at the same time, build this part of the tree.
+\end{enumerate}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{Explain how LR parsing works on an example.}
+\begin{itemize}
+\item See \textbf{Lecture 05 p.28}: \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L05.pdf}
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is an LR item?}
+\begin{itemize}
+\item An $LR(1)$ item is: \texttt{X ->} $\alpha$ • $\beta$ 
+\item A production extended with: a dot (•), corresponding to the position in the input sentence. 
+\item One or more possible \textbf{lookahead} terminal symbols \texttt{t,s} (\texttt{?} when the lookahead doesn't matter).
+\item $\alpha$ and $\beta$ are sequences of terminal and nonterminal symbols.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What does an LR state consist of?}
+\begin{itemize}
+\item The states in the DFA are sets of LR items.
+\end{itemize}
+\end{block}
+
+\begin{block}{What does it mean to take the closure of a set of LR items?}
+\begin{itemize}
+\item Adding new productions for nonterminals following the dot, until no more productions can be added, is called taking the closure of the LR item set.
+\end{itemize}
+\end{block}
+
+\begin{block}{What do the edges in an LR DFA represent?}
+\begin{itemize}
+\item Actions.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{How can an LR table be constructed from an LR DFA?}
+\begin{enumerate}
+\item For each edge from state $j$ to state \texttt{k} labelled by token \texttt{t}, add an action \texttt{s k} (shift \texttt{t} and goto state \texttt{k}) to $table[j,t]$.
+\item For each edge from state $j$ to state \texttt{k} labelled by nonterminal \texttt{X}, add an action \texttt{g k} (goto state \texttt{k}) to $table[j,X]$.
+\item For a state $j$ containing an \textbf{LR} item with the dot to the left of \$, add an action \texttt{a} (accept) to $table[j,\$]$.
+\item For each state $j$ that contains an \textbf{LR} item for a production \texttt{p}, and where the dot is at the end, and the lookahead is \texttt{t}, add an action \texttt{r p} (reduce \texttt{p}) to $table[j,t]$.
+\end{enumerate}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{How is the LR table used for parsing?}
+\begin{enumerate}
+
+\item Use a symbol stack and a state stack
+\item The current state is the state stack top. 
+\item Push state 1 to the state stack
+\item Perform an action for each token:
+\begin{itemize}
+\item Case Shift $s$:
+\begin{enumerate}
+\item Push the token to the symbol stack.
+\item Push $s$ to the state stack.
+\item The current state is now $s$.
+\end{enumerate}
+\item Case Reduce \texttt{p}:
+\begin{enumerate}
+\item Pop symbols for the $rhs$ of \texttt{p}.
+\item Push the lhs symbol $X$ of \texttt{p}.
+\item Pop the same number of states.
+\item Let $s_1 =$ the top of the state stack.
+\item Let $s_2 = table[s1,X]$.
+\item Push $s_2$ to the state stack.
+\item The current state is now $s_2$.
+\end{enumerate}
+\item Case Accept: Report successful parse.
+\end{itemize}
+
+\end{enumerate}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is meant by a shift-reduce conflict and a reduce-reduce conflict?}
+\begin{itemize}
+\item A shift-reduce conflict:\\
+\texttt{E -> E • "+" E    ?}\\
+\texttt{E -> E   "*" E • "+"}
+\item A reduce-reduce conflict:\\
+\texttt{A -> B C • t}\\
+\texttt{D -> C •   t}
+\end{itemize}
+\end{block}
+
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{How can such a conflict be analyzed?}
+\begin{itemize}
+\item Shift-reduce conflicts can sometimes be solved with precedence rules. In particular for binary expressions with priority and associativity.
+\item For other cases, you need to carefully analyze the shift-reduce conflicts to see if precedence rules are applicable, or if you need to change the grammar.
+\item For reduce-reduce conflicts, it is advisable to think through the problems, and change the grammar.
+\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}
+
+\begin{block}{How can precedence rules be used in an LR parser?}
+\texttt{\%precedence nonassoc EQ}\\
+\texttt{\%precedence left PLUS, MINUS}\\
+\texttt{\%precedence left TIMES, DIV}\\
+\texttt{\%precedence right POWER}\\
+Where the above terminals are denoted by their respective operator strings inside the scanner.
+\end{block}
+
+\begin{block}{What is LR(0) and SLR parsing?}
+\begin{itemize}
+\item LR(0):
+\begin{itemize}
+\item LR items without lookahead.
+\item Not very useful in practice.
+\end{itemize}
+
+\item SLR (Simple LR):
+\begin{itemize}
+\item Look at the FOLLOW set to decide where to put reduce actions.
+\item Can parse many useful grammars.
+\end{itemize}
+
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\begin{block}{What is the difference between LALR(1) and LR(1)?}
+\begin{itemize}
+\item LALR(1) (Lookahead LR(1)) Merges states that have the same LR items, but different look-aheads.
+\item Leads to much smaller tables than LR(1).
+\item LR(1) Slightly more powerful than LALR(1), not used in practice.
+\item The tables become very large.
+\end{itemize}
+\end{block}
+
+\begin{block}{Explain why the LALR(1) algorithm is most commonly used in parser generators.}
+\begin{itemize}
+\item Reasonably powerful. Tables do not become too large.
+\item Used by most well known tools: Yacc, CUP, Beaver, SableCC, etc.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}
+\begin{block}{What is a GLR parser?}
+\begin{itemize}
+\item GLR (Generalized LR) can parse any context free grammar. Including ambiguous grammars!
+\item Returns a parse forest (all possible parse trees).
+\item Can parse grammars with shift-reduce and reduce-reduce conflicts (spawns parallel parsers).
+\item Has cubic worst-case complexity (in the length of the input).
+\item Is often much better than that in practice. But still slower than LALR. Used in several research systems.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\subsection{Lecture 6: The Expression problem, Static AOP, The Visitor pattern}
+\begin{frame}
+\begin{block}{What is the Expression Problem? }
+\begin{itemize}
+\item Being able to define language constructs in a modular way.
+\item Define computations in a modular way.
+\item Compose these modules as we like, preferrably with separate compilation of the modules.
+\item Attain full type safety (without need for casts).
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+
+\begin{frame}
+
+\begin{block}{Why is solving the Expression Problem desirable for implementing compilers?}
+\begin{itemize}
+\item In order to make the compiler a more modular entity.
+\item Visitors: an OO (Object Oriented) design pattern.
+\begin{itemize}
+\item Modularize through clever indirect calls.
+\item Not full modularization, not composition.
+\item Supported by many parser generators.
+\item Reasonably useful, commonly used in industry.
+\end{itemize}
+\item Static Aspect-Oriented Programming (AOP).
+\begin{itemize}
+\item Also known as inter-type declarations (ITDs)
+\item Use new language constructs (aspects) to factor out code.
+\item Solves the expression problem in a nice simple way.
+\item The drawback: requires a new language: AspectJ, JastAdd.
+\end{itemize}
+\item Advanced language constructs.
+\begin{itemize}
+\item Use more advanced language constructs: virtual classes in \textit{gbeta}, traits in \textit{Scala}, typeclasses in \textit{Haskell} etc.
+\item Drawbacks: More complex than static AOP.
+\end{itemize}
+
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What are different ways of solving the Expression Problem?}
+\begin{itemize}
+\item Edit the AST classes (i.e., actually not solving the problem)
+\item Visitors: an OO design pattern.
+\item Static Aspect-Oriented Programming (AOP), Advanced language constructs.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why is it a bad idea to edit generated code?}
+\begin{itemize}
+\item Non-modular, non-compositional.
+\item It is always a \textit{VERY BAD IDEA} to edit generated code!
+\item Sometimes used anyway in industry.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is an inter-type declaration? }
+Static Aspect-Oriented Programming (AOP) also known as inter-type declarations (ITDs).
+\end{block}
+
+\begin{block}{What is aspect-oriented programming?}
+Aspect-oriented programming is a wider concept that usually focuses on dynamic behavior.
+\end{block}
+
+
+\end{frame}
+
+
+\begin{frame}
+\begin{block}{How does static AOP differ from dynamic AOP?}
+Read \textbf{Lecture 06 p.28} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L06.pdf}
+%\begin{tiny}
+%\begin{tabular}{c|cc}
+%\hline 
+%• & Static Aspects & Visitors \\ 
+%\hline 
+%Modularization of & Instance variables, Methods, Implements clauses & Only methods \\ 
+%\hline 
+%Type safety? & Full type precision & Casts may be needed depending of framework \\ 
+%\hline 
+%Method parameters & Any number & Only one  \\ 
+%\hline 
+%Ease of use? & Very simple & Clumsy, boilerplate code required \\ 
+%\hline 
+%Module composition? & Yes & No - you can extend a Visitor, but not combine two \\ 
+%\hline 
+%Separate compilation? & Not for JastAdd, but can be implemented & Yes \\ 
+%Mainstream OO language? & No - you need JastaAdd, AspectJ, or similar. & Yes, use Java or any other OO language. \\ 
+%\end{tabular} 
+%\end{tiny}
+\end{block}
+
+\begin{block}{Explain how the Visitor pattern can be implemented. }
+\begin{itemize}
+\item Add boilerplate code that allows delegation to a Visitor object.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{Implement a computation over the AST using static aspects.}
+{\tiny \verbatiminput{aspect_ex.jrag}}
+The same computations can be implemented with Visitors using \textit{accept} methods.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+
+\begin{block}{Why can traversing visitors be useful?}
+Counting identifiers becomes sequential, as opposed to aspect-oriented programming.
+\end{block}
+
+
+\begin{block}{What are advantages and disadvantages of static AOP as compared to Visitors?}
+Read \textbf{Lecture 06 p.28} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L06.pdf}
+\end{block}
+\end{frame}
+
+
+
+\subsection{Lecture 7: Attribute grammars Name analysis}
+\begin{frame}
+
+
+\begin{block}{How does the Lookup pattern work?}
+\begin{itemize}
+\item \texttt{decl} – the name binding.
+\item \texttt{lookup(String)} – finds the declaration.
+\item \texttt{localLookup(String)} – looks locally.
+\item \texttt{eq child.lookup(String)} – delegates to localLookup and lookup attributes, according to scope rules.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is demand evaluation? }
+Attributes are not evaluated until demanded.
+\end{block}
+
+
+\begin{block}{Why are attributes cached? }
+Eliminate complexity.
+\end{block}
+
+\begin{block}{What is the Null Object pattern?}
+Use a real object instead of null. Give the object suitable behavior. The code becomes simpler.
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is an NTA? }
+An NTA is both a node and an attribute.
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{How does the Root Attribute pattern work? }
+\begin{itemize}
+\item Make an attribute in the root visible throughout the AST.
+\item Solution: Add an equation in the root, propagating the value to the children.
+\item Expose the attribute by declaring it as inherited where it is needed.
+\item Or declare it in ASTNode. Then it will be visible in all nodes.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why is it useful to implement missing declarations and unknown types as AST nodes?}
+\begin{itemize}
+\item Missing declaration errors will give type checking errors as well.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{How can localLookup be implemented? }
+Use a local hash-map which is built on the first access. After that each access is done in constant time. Resulting complexity: $O(n)$.
+\end{block}
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{What is type analysis and type checking? }
+Check if types are used correctly.
+\end{block}
+
+
+
+\begin{block}{How can unnecessary error propagation be avoided? }
+Propagate a reference to the Program root (Root Attribute pattern).
+\end{block}
+
+
+\begin{block}{What is a collection attribute? }
+\begin{itemize}
+\item A collection attribute holds a \textbf{composite value}.
+\item \textbf{Contribution rules} can declare elements that should contribute to the composite value.
+\item The attribute evaluator will automatically traverse the AST starting from a given root and add the contributions, using a method \texttt{m} which must be commutative.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{How can a collection of error message be implemented? }
+
+\begin{itemize}
+\item Declare a collection attribute, and make AST node contribute error string to that collection.
+\end{itemize}
+
+\end{block}
+\end{frame}
+
+\subsection{Lecture 8: LL parsing, Nullable, First and Follow}
+\begin{frame}
+\begin{block}{Construct an LL(1) table for a grammar.}
+See \textbf{Lecture 07 p.6} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L08.pdf}
+\end{block}
+
+\begin{block}{Why can it be useful to add an end-of-file rule to some grammars?}
+Usefulness not explained at all in lecture slide. Dealing with End of File problem is described however:\\ \textbf{Lecture 07 p.8} \url{http://fileadmin.cs.lth.se/cs/Education/EDAN65/2014/lectures/L08.pdf}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{How can we decide if a grammar is LL(1) or not?}
+\begin{itemize}
+\item Collision in a table entry!
+\item If some entry has more than one element, then the grammar is not LL(1).
+\end{itemize}
+\end{block}
+
+\begin{block}{What is the definition of NULLABLE, FIRST, and FOLLOW?}
+\begin{itemize}
+\item FIRST($\gamma$): the tokens that can appear first in a $\gamma$ derivation 
+\item NULLABLE($\gamma$): can the empty string be derived from $\gamma$? 
+\item FOLLOW($X$): the tokens that can follow an $X$ derivation
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is a fixed-point problem?}
+\begin{itemize}
+\item Computing NULLABLE(X) is an example of a fixed-point problem. These problems have the form:
+\begin{itemize}
+\item $x == f(x)$
+\item Can we find a value x for which the equation holds (i.e. a solution)?
+\item x is then called a fixed point of the function f.
+
+\end{itemize}
+
+\end{itemize}
+\end{block}
+
+\begin{block}{How can it be solved using iteration?}
+\begin{itemize}
+\item Fixed-point problems can (sometimes) be solved using iteration:
+
+\begin{enumerate}
+\item Guess an initial value $x_0$.
+\item Apply the function iteratively, until the fixed point is reached.
+\end{enumerate}
+
+\end{itemize}
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{block}{How can we know that the computation terminates?}
+\begin{itemize}
+\item The computation will terminate because:
+\begin{itemize}
+\item The variables are only changed monotonically (from false to true).
+\item The number of possible changes is finite (from all false to all true).
+\end{itemize}
+
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\subsection{Lecture 9: More attribute grammar constructs}
+\begin{frame}
+\begin{block}{What is an intrinsic attribute? }
+The terminal symbols (like ID) are intrinsic attributes – constructed when building the AST. They are \textbf{not} defined by equations.
+\end{block}
+
+\begin{block}{What is an externally visible side-effect? Why are they not allowed in the equations? }
+Making changes outside the object itself.
+\end{block}
+
+\begin{block}{What is a circular attribute?}
+\begin{itemize}
+\item The attribute may depend on itself (solved using fixed-point iteration)
+\item A circular attribute may depend (transitively) on itself.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{How is a circular attribute evaluated? }
+Circularity is checked at runtime (results in exception).
+\end{block}
+
+\begin{block}{How can you know if the evaluation of a circular attribute will terminate? }
+\begin{itemize}
+\item The attribute values (sets of states) can be arranged in a lattice.
+\item The lattice is of finite height (the number of states is finite).
+\item The equations are monotonic: they use set union.
+\end{itemize}
+\end{block}
+
+\begin{block}{Give examples of properties that can be computed using circular attributes. }
+Among others:
+\begin{itemize}
+\item Reachability.
+\item Enclosing function.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+
+\subsection{Lecture 10: Run-time systems for procedural languages}
+\begin{frame}
+\begin{block}{What is the difference between registers and memory? }
+\begin{itemize}
+\item Execution is performed through the registers.
+\item Memory is only used to store data.
+
+\end{itemize}
+\end{block}
+
+\begin{block}{What typical segments of memory are used? }
+Typically divided into different segments: 
+\begin{itemize}
+\item Global data. 
+\item Code.
+\item Stack.
+\item Heap.
+
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is an activation?}
+\begin{itemize}
+\item The data for each method call is stored in an activation.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why are activations put on a stack?}
+\begin{itemize}
+\item To persist the order of execution.
+\end{itemize}
+\end{block}
+
+\begin{block}{What are FP, SP, and PC?}
+\begin{itemize}
+\item FP – Frame Pointer. The first word of the current activation
+\item SP – Stack Pointer. The first unused word of the stack
+\item PC – Program counter. The currently executing instruction.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{What is the static link? Is it always needed? }
+\begin{itemize}
+\item Static link: Frame of enclosing method/object.
+\item Required for return \texttt{ret} to function, otherwise \texttt{undefined behaviour} will be triggered.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is the dynamic link? }
+\begin{itemize}
+\item Points to the frame of the calling method.
+\end{itemize}
+\end{block}
+
+\begin{block}{What is meant by the return address?  }
+\begin{itemize}
+\item Saved PC (Program Counter) - where to jump at return.
+\end{itemize}
+\end{block}
+
+
+\begin{block}{How can local variables be accessed? }
+\begin{itemize}
+\item By computing offset relative FP.
+\end{itemize}
+\end{block}
+
+\begin{block}{How can non-local variables be accessed?  }
+\begin{itemize}
+\item By computing offset relative SP.
+\end{itemize}
+\end{block}
+
+\begin{block}{How does the compiler compute offsets for variables? }
+\begin{itemize}
+\item Compiler offsets are computed by numbering each function's variables.
+\item Each function should have an attribute denoting the amount of variables it its subtree.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What happens at a method call? }
+\begin{enumerate}
+\item Transfer the arguments and the static link.
+\item Store the return address in a register and jump to code of the called procedure. 
+\item Allocate the new activation and move FP. 
+\item Run the code for p2. 
+\item Store the return value in a register.
+\item Deallocate the activation.
+\item Move FP back.
+\item Jump back to the return address. 
+\item Save the return value if needed.
+\item Continue executing in p1. 
+
+\end{enumerate}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What information does the compiler need to compute in order to generate code for accessing variables? For a method call? }
+
+\begin{itemize}
+
+\item For variables and argument uses.
+\begin{itemize}
+\item The offsets to use (relative to the Frame Pointer). 
+\item The number of static levels to use (0 for locals).
+\end{itemize}
+\item For method calls.
+\begin{itemize}
+\item The number of static levels to use (0 for local methods).
+\end{itemize}
+\item For method declarations.
+\begin{itemize}
+\item The space needed for local declarations and temporaries.
+\end{itemize}
+
+
+\end{itemize}
+
+
+\end{block}
+
+\begin{block}{What is meant by \textbf{calling conventions}? }
+\begin{itemize}
+\item \textbf{Calling conventions}: conventions for which activation has the responsibility of saving a particular register. Often platform-specific.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\subsection{Lecture 11: Code generation}
+
+\begin{frame}
+\begin{block}{What is the difference between intermediate code and assembly code? }
+Expressions are broken down to one operation per instruction, introducing temporary variables for each non trivial expression.
+\begin{itemize}
+\item Variables have high level symbolic names.
+\item Control structures are implemented using branch instructions that  jump to labels.
+\end{itemize}
+Machine code assembly code: 
+\begin{itemize}
+\item Operations can only be done on registers.
+\item Values in memory need to be loaded to registers before performing the operation.
+\item Variable names are replaced by addresses, typically relative to the frame pointer.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{Mention two kinds of typical intermediate code. When are they useful?}
+\begin{itemize}
+\item Three address uses temp variables, code close to ordinary register based code, good for optimization.
+\item Stack code uses value stack, commonly used for interpreters and virtual machines.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why is it not meaningful to minimize the number of temporaries in intermediate code? }
+\begin{itemize}
+\item Typically, the intermediate code is optimized at a later stage.
+\item The optimizations transform  the code and introduce new temporaries. 
+\item Temporaries are optimized as a final step, as part of register allocation.
+\item Trying to minimize the number of temporaries at the code generation stage is therefore meaningless.
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\begin{block}{What is register allocation?}
+Goal of register allocation: 
+\begin{itemize}
+\item Try to keep as many variables and temporaries as possible in registers, ”spilling” as few of them as possible into memory.
+\end{itemize}
+
+\end{block}
+
+\end{frame}
+
+\subsection{Lecture 12: What information needs be computed before generating code?}
+\begin{frame}
+\begin{block}{What information needs be computed before generating code?}
+\begin{itemize}
+\item Expression evaluation, using temporaries, local variables, formal arguments.
+\item Method call, passing arguments and return values.
+\item Method activation and return, setting up a new frame, restoring it.
+\item Control structures, labels and branching.
+\end{itemize}
+\end{block}
+
+\begin{block}{How do explicit temporaries work? How do stacked temporaries work? }
+\begin{itemize}
+\item Explicit temporaries: each operation puts its result in a new \texttt{temp}.
+\item Stacked temporaries: each expression puts its result in \texttt{rax}.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What are the advantages and disadvantages of these implementation techniques? }
+\begin{itemize}
+\item Code generation is simpler for stacked temps–we don’t need to compute addresses for temps.
+\item To generate code for method calls, we need to evaluate the arguments from right to left, to push them in the appropriate order on the stack.
+\item Not all languages allow this.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{How can local variable numbers be computed using attributes?}
+
+Imperatively, it would be simple: traverse the tree and give each \texttt{VarDecl} an increasing \texttt{index}.
+\end{block}
+
+
+\begin{block}{How can unique labels be computed?}
+Give each statement a ”pathname” relative to the function.
+
+\begin{itemize}
+
+\item E.g. \texttt{3\_2} means the 2nd statement in the 3rd statement in the function. 
+\item Generate labels such as \texttt{m\_3\_2\_whilestart} and \texttt{m\_3\_2\_whileend}.
+
+\end{itemize}
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is the difference between a text and a data segment in an assembly program?}
+\begin{itemize}
+\item \texttt{.data} - data segment for global data
+\item \texttt{.text} - text segment for code, write protected
+\end{itemize}
+\end{block}
+
+\begin{block}{What needs to be done to run a program in assembly code?}
+\begin{itemize}
+\item Link object code with library object code into executable code.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\subsection{Lecture 13: Object-oriented languages}
+\begin{frame}
+\begin{block}{What is the difference between dynamic and static typing? Is Java statically typed?}
+\begin{itemize}
+\item Dynamic typing:
+\begin{itemize}
+\item  At runtime, every object has a type.
+\end{itemize}
+\item Static typing:
+\begin{itemize}
+\item At runtime, every object has a type.
+\item At compile time, every variable has a type.
+\item At runtime, the variable points to an object of at least that type.
+\end{itemize}
+
+\end{itemize}
+\end{block}
+
+\begin{block}{What is a heap pointer?}
+\texttt{HP} – Heap Pointer (where to allocate next object).
+\end{block}
+
+\begin{block}{How are inherited fields represented in an object?}
+Subclass has all the superclass fields.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is prefixing?}
+\begin{itemize}
+
+
+\item Fields of the superclass are placed in front of local fields ("prefixing").
+\item Each field is thus located at an offset computed at compile time, regardless of the dynamic type of the object.
+\end{itemize}
+\end{block}
+
+\begin{block}{How can dynamic dispatch be implemented?}
+\begin{itemize}
+
+
+\item Calling methods in presence of inheritance and overriding). Two common implementation methods:
+\begin{itemize}
+\item Virtual tables (Uses static typing. Simula, C++).
+\item Hash table (For dynamic typing. Smalltalk, ...).
+\end{itemize}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is a virtual table?}
+Virtual tables:
+\begin{itemize}
+\item Class descriptor contains virtual table (often called "vtable").
+\item Pointers to superclass methods are placed in front of locally declared methods ("prefixing").
+\item Each method pointer is located at an offset computed at compile time, using the static type.
+\end{itemize}
+\end{block}
+
+\begin{block}{Why is it not straightforward to optimize object-oriented languages? }
+Virtual tables:
+\begin{itemize}
+\item Many small methods – not much to optimize in each.
+\item Virtual methods slower to call.
+\item Virtual methods are difficult to inline.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is an inline call cache?}
+Inline call caches a way to optimize method calls at runtime.
+\end{block}
+
+\begin{block}{What is a polymorphic inline cache (PIC)?}
+\begin{itemize}
+
+
+\item A generalization of inline call caches, handle several possible object types.
+\item Inline the prologues into the calling code. Check for several types.
+\end{itemize}
+\end{block}
+
+\begin{block}{How can code be further optimized when call caches are used?}
+\begin{itemize}
+
+
+\item Inlining method bodies.
+\item Copy the called methods into the calling code.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{What is meant by dynamic adaptive compilation?}
+\begin{itemize}
+
+
+\item Keep track of execution profile, add PICs dynamically, order cases according to frequency.
+\item Inline the called methods if sufficiently frequent optimize the code if sufficiently frequent.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\end{document}
