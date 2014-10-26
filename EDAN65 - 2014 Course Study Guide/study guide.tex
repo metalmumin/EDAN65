@@ -274,19 +274,19 @@ Returns architecture-specific assembly code. \\Assembler and Linker do the rest.
 \begin{frame}
 \frametitle{Give an example of how to implement a DFA in Java. }
 
-\begin{block}{Table driven}
+\begin{block}{Table driven implementation}
 \begin{itemize}
-\item Represent the automaton by a table.
-\item Additional table to keep track of final states and token kinds.
-\item A global variable keeps track of the current state.
+\item Represent the automaton by a \textbf{table}.
+\item Additional table to keep track of \textbf{final states} and \textbf{token kinds}.
+\item A \textbf{global variable} keeps track of the \textbf{current state}.
 \end{itemize}
 \end{block}
 
-\begin{block}{Switch statement}
+\begin{block}{Switch statement implentation}
 \begin{itemize}
-\item Each state is implemented as a switch statement.
-\item Each case implements a state transition as a jump (to another switch statement).
-\item The current state is represented by the program counter. 
+\item Each state is implemented as a \textbf{switch statement}.
+\item Each case implements a state transition as a \textbf{jump} (to another switch statement).
+\item The current state is represented by the \textbf{program counter}. 
 \end{itemize}
 \end{block}
 
@@ -297,39 +297,39 @@ Returns architecture-specific assembly code. \\Assembler and Linker do the rest.
 \frametitle{How is rule priority handled in the implementation?}
 \begin{block}{Longest match?}
 \begin{itemize}
-\item If two rules can be used to match the same sequence of characters, the first one takes priority.
+\item If \textbf{two} rules can be used to \textbf{match the same} sequence of characters, the \textbf{first} one takes \textbf{priority}.
 \item The general idea:
 \begin{enumerate}
-\item When a token is matched don't stop scanning.
-\item When the error state is reached, return the last token matched.
-\item Push read characters that are unused back into the file, so they can be scanned again.
-\item Use a PushbackFile to accomplish this.
+\item When a token is matched \textbf{don't stop scanning}.
+\item When the \textbf{error} state is reached, \textbf{return} the \textbf{last token} matched.
+\item \textbf{Push} read characters that are \textbf{unused} back into the file, so they can be \textbf{scanned again}.
+\item Use a \texttt{PushbackFile} to accomplish this.
 \end{enumerate}
 \end{itemize}
 \end{block}
 
 \begin{block}{EOF?}
 \begin{itemize}
-\item Construct an explicit EOF token when the EOF character is read.
+\item Construct an \textbf{explicit EOF} token when the \texttt{EOF} character is read.
 \end{itemize}
 \end{block}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{How is rule priority handled in the implementation?}
+\frametitle{How is rule priority handled in the implementation? Cont.}
 
 \begin{block}{Whitespace?}
 \begin{itemize}
-\item View as tokens of a special kind.
-\item Scan the as normal tokens, but don't create any objects for them.
-\item Loop in \texttt{next()} until a real token has been found.
+\item Whitespaces are viewed as tokens of a \textbf{special kind}.
+\item Scan the as \textbf{normal tokens}, but create \textbf{no objects} for them.
+\item \textbf{Loop} in \texttt{next()} \textbf{until} a \textbf{real token} has been found.
 \end{itemize}
 \end{block}
 
 \begin{block}{Errors?}
 \begin{itemize}
-\item Construct an explicit ERROR token to be returned when no valid token can be found.
+\item Construct an \textbf{explicit ERROR} token to be returned \textbf{when no valid token} can be found.
 \end{itemize}
 \end{block}
 
@@ -351,40 +351,41 @@ Returns architecture-specific assembly code. \\Assembler and Linker do the rest.
 \subsection{Lecture 3: Context-free grammars. Introduction to parsing.}
 \begin{frame}
 
-\begin{block}{Construct a CFG for a simple part of a programming language.	}
+\frametitle{Construct a CFG for a simple part of a programming language.	}
 \texttt{Stmt -> WhileStmt | AssignStmt | ...}\\
 \texttt{WhileStmt -> WHILE LPAR Exp RPAR Stmt}\\
 \texttt{Exp -> ID | ...}\\
 \texttt{...}\\
-Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest are non-terminal production rules.
+\begin{itemize}
+\item Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest are non-terminal production rules.
+\end{itemize}
 
-\end{block}
 \end{frame}
 
 \begin{frame}
 
 \begin{block}{What is a \textbf{nonterminal symbol}?}
 \begin{itemize}
-\item A non-token symbol, which are represented by inner nodes in the pares tree.
+\item A non-token symbol, which are represented by \textbf{inner nodes} in the pares tree.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is a \textbf{terminal symbol}?}
 \begin{itemize}
-\item Terminals are tokens which are leafs in the parse tree.
+\item Terminals are tokens which are \textbf{leafs} in the parse tree.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is a \textbf{production}?}
 \begin{itemize}
-\item A grammar rule defining a non-terminal node.
+\item A grammar rule defining a \textbf{non-terminal node}.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is a \textbf{start symbol}?}
 \begin{itemize}
-\item The start symbol is the root in the parse tree.
-\item Starting point for the grammar.
+\item The start symbol is the \textbf{root} in the parse tree.
+\item \textbf{Starting point} for the grammar.
 \end{itemize}
 \end{block}
 
@@ -394,21 +395,21 @@ Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest
 \begin{block}{What is a \textbf{parse tree}?}
 \begin{itemize}
 \item It is a \textbf{derivation tree}, which is the representation of a set of derivations based on a language grammar.
-\item A parse tree must be unambiguous for it to fulfill its task.
+\item A parse tree \textbf{must be unambiguous} for it to fulfill its task.
 \end{itemize}
 \end{block}
 
 
 \begin{block}{What is a \textbf{left-hand side} of a production?}
 \begin{itemize}
-\item The left-hand side $X$ of a production rule is a non-terminal.
+\item The left-hand side $X$ of a production rule is a \textbf{non-terminal}.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is a \textbf{right-hand side} of a production?}
 \begin{itemize}
-\item The right-hand side $Y_1 Y_2 ... Y_{n-1} Y_{n}$  is a sequence of nonterminals and terminals.
-\item If the right-hand side for a production is empty we write $\varepsilon$.
+\item The right-hand side $Y_1 Y_2 ... Y_{n-1} Y_{n}$  is a sequence of \textbf{nonterminals and terminals}.
+\item If the right-hand side for a production is \textbf{empty} we write $\varepsilon$.
 \end{itemize}
 \end{block}
 
@@ -446,19 +447,19 @@ Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest
 
 \begin{block}{What is a \textbf{derivation}?}
 \begin{itemize}
-\item It is a sequence of derivation steps.
+\item It is a sequence of \textbf{derivation steps}.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is \textbf{leftmost derivation}?}
 \begin{itemize}
-\item In a leftmost derivation, the leftmost nonterminal is replaced in each derivation step.
+\item In a leftmost derivation, the \textbf{leftmost} nonterminal is \textbf{replaced} in each derivation step.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is \textbf{rightmost derivation}?}
 \begin{itemize}
-\item In a rightmost derivation, the rightmost nonterminal is replaced in each derivation step.
+\item In a rightmost derivation, the \textbf{rightmost} nonterminal is \textbf{replaced} in each derivation step.
 \end{itemize}
 \end{block}
 
@@ -477,14 +478,14 @@ Where the following \texttt{terminals = \{WHILE, LPAR, RPAR, ID\}}, and the rest
 
 \begin{block}{What does it mean for a grammar to be \textbf{ambiguous}?}
 \begin{itemize}
-\item \texttt{CFG} (Context Free Grammar) is ambiguous if a sentence in the language can be derived by \textbf{two (or more)} different parse trees.
+\item \texttt{CFG} (Context Free Grammar) is ambiguous if a sentence in the language can be derived by \textbf{two (or more) different parse trees}.
 \end{itemize}
 \end{block}
 
 
 \begin{block}{What does it mean for a grammar to be \textbf{unambiguous}?}
 \begin{itemize}
-\item \texttt{CFG} is unambiguous if each sentence in the language can be derived by \textbf{only one} syntax tree.
+\item \texttt{CFG} is unambiguous if each sentence in the language can be derived by \textbf{only one syntax tree}.
 \end{itemize}
 \end{block}
 
@@ -521,12 +522,12 @@ Ambiguity due to the \textbf{lack of operator precedence}, thus multiplication a
 
 \begin{block}{What is the difference between \textbf{LL(1)} and \textbf{LL(2)}? Or between \textbf{LR(1)} and \textbf{LR(2)}?}
 \begin{itemize}
-\item LL($k$) and LR($k$), where $k$ denotes the number of lookahead tokens.
-\item May look $k$ tokens into the scanner in order to decide which nonterminal production to apply.
+\item LL($k$) and LR($k$), where $k$ denotes the \textbf{number} of \textbf{lookahead tokens}.
+\item May \textbf{look} $k$ tokens \textbf{ahead} into the scanner in order to \textbf{decide} which nonterminal \textbf{production rule} to apply.
 \end{itemize}
 \end{block}
 
-\begin{block}{Construct a recursive descent parser for a simple language.}
+\begin{block}{Construct a \textbf{recursive descent} parser for a simple language.}
 \texttt{A -> B | C | D }\\
 \texttt{B -> e C f D }\\
 \texttt{C -> ...}\\
@@ -538,23 +539,23 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 
 \begin{frame}
 
-\begin{block}{Give typical examples of grammars that cannot be handled by a recursive- descent parser.}
+\begin{block}{Give typical examples of grammars that \textbf{cannot be handled} by a \textbf{recursive-descent} parser.}
 \begin{itemize}
-\item Grammars that have circular dependencies, which cause infinite left-recursion, and those that are ambiguous.
+\item Grammars that have \textbf{circular dependencies}, which cause \textbf{left-recursion}, and those that are ambiguous.
 \end{itemize}
 \end{block}
 
 
-\begin{block}{Explain why context-free grammars are more powerful than regular expressions.}
+\begin{block}{Explain why \textbf{context-free} grammars are \textbf{more powerful} than regular expressions.}
 \begin{itemize}
-\item Because a \texttt{CFG} can handle recursion.
+\item Because a \texttt{CFG} can \textbf{handle recursion}.
 \end{itemize}
 \end{block}
 
 
-\begin{block}{In what sense are context-free grammars ”context-free"?}
+\begin{block}{In what sense are context-free grammars ”\textbf{context-free}"?}
 \begin{itemize}
-\item CFG is not constrained to one grammar (tree), thus may change evaluation rules depending on subtree, which can be an entire language.
+\item CFG is not constrained to one grammar (tree), thus may \textbf{change evaluation rules} depending on "\textbf{subtree}", which can be an entire language.
 \end{itemize}
 \end{block}
 
@@ -563,31 +564,31 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 \subsection{Lecture 4: Ambiguities LL problems}
 \begin{frame}
 
-\begin{block}{What does it mean for a grammar to be ambiguous?}
+\begin{block}{What does it mean for a grammar to be \textbf{ambiguous}?}
 \begin{itemize}
-\item A \texttt{CFG} is ambiguous if there is a sentence in the language that can be derived by two (or more) different parse trees.
+\item A \texttt{CFG} is ambiguous if there is a sentence in the language that can be derived by \textbf{two (or more) different parse trees}.
 \end{itemize}
 \end{block}
 
 
-\begin{block}{What does it mean for two grammars to be equivalent?}
+\begin{block}{What does it mean for \textbf{two grammars} to be \textbf{equivalent}?}
 \begin{itemize}
-\item Two grammars, G1 and G2, are equivalent if they generate the same language.
+\item Two grammars, $G1$ and $G2$, are equivalent if they \textbf{generate the same language}.
 \end{itemize}
 \end{block}
 
-\begin{block}{Exemplify some common kinds of ambiguities.}
+\begin{block}{Exemplify some common kinds of \textbf{ambiguities}.}
 \begin{itemize}
-\item Operators with different priorities.
-\item Associativity of operators with same priority.
+\item Operators with different \textbf{priorities}.
+\item Associativity of operators with \textbf{same priority}.
 \item Dangling \texttt{else}.
 \end{itemize}
 \end{block}
 
 
-\begin{block}{Exemplify how expression grammars can be disambiguated.}
+\begin{block}{Exemplify how \textbf{expression} grammars can be \textbf{disambiguated}.}
 \begin{itemize}
-\item Subtrees for \texttt{INT "+" INT "*" INT}, with rule-priority.
+\item \textbf{Subtrees} for \texttt{INT "+" INT "*" INT}, with inherent \textbf{rule-priority}.
 \end{itemize}
 \end{block}
 
@@ -595,20 +596,20 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 
 \begin{frame}
 
-\begin{block}{What is the "dangling else"-problem, and how can it be solved?}
+\begin{block}{What is the \textbf{"dangling else"-problem}, and how can it be solved?}
 \begin{itemize}
 \item Two possible parse trees pose a problem. Three possible solutions:
 \begin{enumerate}
-\item Rewrite to equivalent unambiguous grammar possible. However this results in more complex grammar.
+\item \textbf{Rewrite} to equivalent \textbf{unambiguous grammar} possible. However this results in more \textbf{complex} grammar.
 \item Use the ambiguous grammar:
 \begin{itemize}
-\item Use \textbf{rule priority} such that the parser can select the correct rule.
-\item Works for the dangling else problem, but not for ambiguous grammars in general.
-\item Not allparser generators support this well.
+\item Use \textbf{rule priority} such that the parser can select the \textbf{correct rule}.
+\item \textbf{Works} for the dangling else problem, but \textbf{not} for \textbf{ambiguous grammars} in general.
+\item Not all parser generators support this well.
 \end{itemize}
 \item Change the language:
 \begin{itemize}
-\item E.g. add a terminal \texttt{fi} that closes the if-statement.
+\item E.g. \textbf{add a terminal} \texttt{fi} that closes the if-statement.
 \item Restrict the \texttt{then} part to be a block: \texttt{\{ ... \}}.
 \item Not always an option.
 \end{itemize}
@@ -619,25 +620,25 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 
 \begin{frame}
 
-\begin{block}{When should we use canonical form, and when BNF or EBNF?}
+\begin{block}{When should we use \textbf{canonical form}, and when \textbf{BNF} or \textbf{EBNF}?}
 \begin{itemize}
 \item Canonical sequence of terminals and nonterminals.
-\item \textbf{BNF} (Backus-Naur Form) alternative productions\\ \texttt{( ... | ... | ... )}.
-\item \textbf{EBNF} (Extended Backus-Naur Form) repetition (\texttt{*} and \texttt{+}), parentheses \texttt{(...)}.
+\item \textbf{BNF} (Backus-Naur Form) \textbf{alternative} productions\\ \texttt{( ... | ... | ... )}.
+\item \textbf{EBNF} (Extended Backus-Naur Form) \textbf{repetition} (\texttt{*} and \texttt{+}), parentheses \texttt{(...)}.
 \end{itemize}
 \end{block}
 
 
 \begin{block}{What is a \textbf{common prefix}?}
 \begin{itemize}
-\item Two derivations rules starting with same token.
+\item \textbf{Two} derivations \textbf{rules} starting with \textbf{same token}.
 \end{itemize}
 \end{block}
 
 
-\begin{block}{Exemplify how a common prefix can be eliminated.}
+\begin{block}{Exemplify how a \textbf{common prefix} can be eliminated.}
 \begin{itemize}
-\item Rewrite to an equivalent grammar without the common prefix
+\item Rewrite to an \textbf{equivalent grammar} without the common prefix.
 \end{itemize}
 \end{block}
 
@@ -646,22 +647,15 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 
 \begin{frame}
 
-\begin{block}{Exemplify how a common prefix can be eliminated.}
-\begin{itemize}
-\item Rewrite to an equivalent grammar without the common prefix.
-\end{itemize}
-\end{block}
-
-
 \begin{block}{What is \textbf{left factoring}?}
 \begin{itemize}
-\item Refactoring the leftmost common prefix.
+\item \textbf{Refactoring} the \textbf{leftmost} common prefix.
 \end{itemize}
 \end{block}
 
 \begin{block}{What is \textbf{left recursion}?}
 \begin{itemize}
-\item The leftmost expression could go to endless recursion.
+\item The \textbf{leftmost expression} could go to \textbf{endless recursion}.
 \end{itemize}
 \end{block}
 
@@ -669,17 +663,14 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 
 
 \begin{frame}
+\frametitle{Exemplify how \textbf{left recursion} can be eliminated in a grammar on \textbf{canonical form}.}
 
-
-\begin{block}{Exemplify how left recursion can be eliminated in a grammar on canonical form.}
-\begin{itemize}
-\item Left recursive:
+Left recursive:
 \begin{itemize}
 \item
 \texttt{E -> E "+" T }\\
 \texttt{E -> T}\\
 \texttt{T -> ID}
-\end{itemize}
 \end{itemize}
 \begin{enumerate}
 \item Rewrite to right-recursion!
@@ -699,7 +690,7 @@ Where, \texttt{terminals = \{e, f\}} are predefined.
 \texttt{T -> ID}
 \end{itemize}
 \end{enumerate}
-\end{block}
+
 
 \end{frame}
 
