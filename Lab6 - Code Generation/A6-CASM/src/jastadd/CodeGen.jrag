@@ -1,6 +1,3 @@
-/**
- * @author jesper.oqvist@cs.lth.se
- */
 aspect CodeGen {
 
 
